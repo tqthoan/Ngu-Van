@@ -44,7 +44,7 @@
         const IS_DEV_ENV = false;
 
         // ======================================================================
-        // BƯỚC 1: ĐIỀN MÃ CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY ĐỂ APP HOẠT ĐỘNG
+        // CẤU HÌNH FIREBASE HIỆN TẠI (ĐÃ KẾT NỐI VỚI THCS NHƠN PHÚ)
         // ======================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyBzTbPNmG7NKjp7SoLKYDmonWZhYti9PhA",
@@ -64,6 +64,7 @@
             }
         } catch(e) { console.warn("Lỗi khởi tạo Firebase", e); }
 
+        // Tự động tạo danh sách 32 lớp (Từ 6A1 đến 9A8)
         const allClassesList = [];
         for (let grade = 6; grade <= 9; grade++) {
             for (let classNum = 1; classNum <= 8; classNum++) {
@@ -71,7 +72,6 @@
             }
         }
 
-        // Cấu hình chuẩn số cột TX theo Thông tư 22
         const subjectConfig = [
             { name: "Toán học", prefix: "Toan", type: "score", txCount: 4, color: "#D9E1F2" },
             { name: "Ngữ văn", prefix: "Van", type: "score", txCount: 4, color: "#FCE4D6" },
@@ -132,12 +132,11 @@
                 setLoginError('');
 
                 if (!db) {
-                    setLoginError('HỆ THỐNG ĐÃ KHOÁ. Vui lòng kết nối Cơ sở dữ liệu Firebase ở Bước 1 trong mã nguồn.');
+                    setLoginError('HỆ THỐNG ĐÃ KHOÁ. Vui lòng kết nối Cơ sở dữ liệu Firebase.');
                     return;
                 }
 
                 if (activeTab === 'student') {
-                    // Đăng nhập bằng Mã định danh
                     const formattedId = studentIdInput.trim();
                     const studentInfo = students.find(s => s.maDinhDanh === formattedId);
                     if (studentInfo) {
@@ -175,7 +174,6 @@
                 setTeacherPasswordInput('');
             };
 
-            // ----- XUẤT SOURCE CODE HTML ĐỂ UP HOST -----
             const downloadAppSource = () => {
                 const scriptElement = document.querySelector('script[type="text/babel"]');
                 let reactCode = scriptElement ? scriptElement.textContent : "";
@@ -192,7 +190,6 @@
                 document.body.removeChild(link);
             };
 
-            // ----- THUẬT TOÁN ĐIỂM SỐ TT22 -----
             const parseNumberOrEmpty = (val) => {
                 if (val === undefined || val === null) return undefined;
                 const s = String(val).trim();
@@ -243,7 +240,6 @@
                 return { result, conduct, title };
             };
 
-            // ----- XUẤT FILE EXCEL THEO LỚP -----
             const downloadTemplate = async () => {
                 try {
                     setIsUploading(true);
@@ -288,9 +284,13 @@
                             }
                         });
 
-                        // Tạo dữ liệu Mẫu, loại bỏ MaHS, dùng MaDinhDanh
-                        const sampleStudent1 = ["0520000001", "hs1@nhonphu.edu.vn", "123456", "Nguyễn Lê Phương Khánh", "Tốt"];
-                        const sampleStudent2 = ["0520000002", "hs2@nhonphu.edu.vn", "123456", "Phạm Thị Thảo", "Khá"];
+                        // Thuật toán tạo ID không trùng lặp dựa trên thứ tự lớp học
+                        const classIndex = allClassesList.indexOf(teacherClass);
+                        const startIdNum = classIndex * 2 + 1;
+                        const formatId = (num) => "052" + String(num).padStart(7, '0');
+
+                        const sampleStudent1 = [formatId(startIdNum), `hs${startIdNum}@nhonphu.edu.vn`, "123456", "Nguyễn Lê Phương Khánh", "Tốt"];
+                        const sampleStudent2 = [formatId(startIdNum + 1), `hs${startIdNum + 1}@nhonphu.edu.vn`, "123456", "Phạm Thị Thảo", "Khá"];
 
                         subjectConfig.forEach(subj => {
                             if (subj.type === 'score') {
@@ -342,7 +342,6 @@
                 }
             };
 
-            // ----- ĐỌC FILE EXCEL TẢI LÊN -----
             const handleFileUpload = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -378,7 +377,6 @@
                                     const row = parsedRows[i];
                                     if (!row || row.length < 3 || String(row[0]).trim() === "") continue; 
                                     
-                                    // Chống lỗi Excel làm mất số 0 ở đầu Mã định danh
                                     let madinhdanh = String(row[0]).trim();
                                     if (madinhdanh.length === 9 && madinhdanh.startsWith('52')) madinhdanh = '0' + madinhdanh;
                                     
@@ -483,9 +481,31 @@
                 }
             };
 
-            const handleDeleteStudent = async (docId) => {
-                if (window.confirm('Bạn có chắc chắn muốn xóa học sinh này khỏi hệ thống?')) {
+            // Hàm xóa từng học sinh
+            const handleDeleteStudent = async (docId, sName) => {
+                if (window.confirm(`Bạn có chắc muốn xóa điểm của học sinh: ${sName}?`)) {
                     await db.collection('students_data_2025_2026').doc(docId).delete();
+                }
+            };
+
+            // Hàm xóa sạch toàn bộ lớp (Dọn dẹp trước khi up file mới)
+            const handleDeleteAllStudents = async () => {
+                if (window.confirm(`⚠️ NGUY HIỂM: Bạn có chắc chắn muốn XÓA SẠCH toàn bộ dữ liệu của lớp ${teacherClass} không?\nHành động này không thể hoàn tác!`)) {
+                    setIsUploading(true);
+                    try {
+                        const batch = db.batch();
+                        myClassStudents.forEach(s => {
+                            const docRef = db.collection('students_data_2025_2026').doc(s.id);
+                            batch.delete(docRef);
+                        });
+                        await batch.commit();
+                        alert(`Đã dọn dẹp sạch sẽ dữ liệu cũ của lớp ${teacherClass}. Bạn có thể tải file Excel mới lên ngay.`);
+                    } catch (error) {
+                        console.error("Lỗi xóa dữ liệu:", error);
+                        alert("Có lỗi xảy ra khi xóa dữ liệu.");
+                    } finally {
+                        setIsUploading(false);
+                    }
                 }
             };
 
@@ -575,12 +595,18 @@
                                     <p className="text-slate-500 text-sm mt-1 font-medium">Quản lý bảo mật cho lớp {teacherClass}.</p>
                                 </div>
                                 <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
-                                    <button onClick={downloadTemplate} disabled={isUploading} className="w-full sm:w-auto px-5 py-3 glass-panel hover:bg-white flex items-center justify-center gap-2 transition-all text-slate-700 rounded-xl font-bold shadow-sm">
-                                        <FileSpreadsheet size={18} className="text-emerald-600" /> {isUploading ? 'Đang xử lý...' : 'Tải File Mẫu Lớp'}
+                                    <button onClick={downloadTemplate} disabled={isUploading} className="w-full sm:w-auto px-4 py-2.5 glass-panel hover:bg-white flex items-center justify-center gap-2 transition-all text-slate-700 rounded-xl font-bold shadow-sm text-sm">
+                                        <FileSpreadsheet size={18} className="text-emerald-600" /> Tải File Mẫu
                                     </button>
+                                    
                                     <input type="file" accept=".xlsx" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
-                                    <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="w-full sm:w-auto justify-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all active:scale-95">
-                                        <Upload size={18} /> Cập Nhật Điểm Lên Hệ Thống
+                                    <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="w-full sm:w-auto justify-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-md transition-all active:scale-95">
+                                        <Upload size={18} /> Cập Nhật Điểm Lên
+                                    </button>
+
+                                    {/* NÚT XÓA SẠCH DỮ LIỆU CŨ CỦA LỚP */}
+                                    <button onClick={handleDeleteAllStudents} disabled={isUploading || myClassStudents.length === 0} className="w-full sm:w-auto justify-center bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors active:scale-95 border border-red-200 disabled:opacity-50">
+                                        <Trash2 size={16} /> Xóa Cũ
                                     </button>
                                 </div>
                             </div>
@@ -612,7 +638,7 @@
                                                     <td className="p-4 font-black text-blue-600 text-center text-sm bg-blue-50/30">{s.cn.summary.result}</td>
                                                     <td className="p-4 text-sm text-amber-600 font-bold">{s.cn.summary.title}</td>
                                                     <td className="p-4 text-right">
-                                                        <button onClick={() => handleDeleteStudent(`${teacherClass}_${s.maDinhDanh}`)} className="text-slate-400 p-2 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"><Trash2 size={18}/></button>
+                                                        <button onClick={() => handleDeleteStudent(s.id, s.name)} className="text-slate-400 p-2 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"><Trash2 size={18}/></button>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -692,7 +718,7 @@
                                     </div>
                                 </div>
 
-                                <div className="p-4 sm:p-5 border-b border-slate-200/50 bg-white/40 flex items-center gap-3">
+                                <div className="p-3 sm:p-5 border-b border-slate-200/50 bg-white/40 flex items-center gap-3">
                                     <div className="p-2 bg-blue-100 rounded-lg text-blue-600"><Activity size={18}/></div>
                                     <span className="font-extrabold text-slate-800">Bảng điểm chi tiết</span>
                                 </div>
@@ -701,33 +727,36 @@
                                     <table className="w-full text-left whitespace-nowrap">
                                         <thead className="bg-slate-50/80 border-b border-slate-200/80">
                                             <tr>
-                                                <th className="px-3 py-4 sm:p-5 text-[11px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider">Môn học</th>
+                                                <th className="px-2 py-3 sm:p-5 text-[10px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider">Môn học</th>
                                                 {termTab !== 'CN' && (
                                                     <>
-                                                        <th className="px-3 py-4 sm:p-5 text-[11px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider">Đ.Thường xuyên</th>
-                                                        <th className="px-3 py-4 sm:p-5 text-[11px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider text-center">Giữa Kỳ</th>
-                                                        <th className="px-3 py-4 sm:p-5 text-[11px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider text-center">Cuối Kỳ</th>
+                                                        <th className="px-1 py-3 sm:p-5 text-[10px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider text-center">
+                                                            <span className="sm:hidden">TX</span>
+                                                            <span className="hidden sm:inline">Thường Xuyên</span>
+                                                        </th>
+                                                        <th className="px-1 py-3 sm:p-5 text-[10px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider text-center">GK</th>
+                                                        <th className="px-1 py-3 sm:p-5 text-[10px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider text-center">CK</th>
                                                     </>
                                                 )}
-                                                <th className="px-3 py-4 sm:p-5 text-[11px] sm:text-sm font-extrabold text-blue-600 uppercase tracking-wider text-center bg-blue-50/50">TBM</th>
+                                                <th className="px-2 py-3 sm:p-5 text-[11px] sm:text-sm font-extrabold text-blue-600 uppercase tracking-wider text-center bg-blue-50/50">TBM</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-100">
                                             {displayData.grades?.map((g, i) => (
-                                                <tr key={i} className={`transition-all duration-200 hover:bg-blue-50/60 ${i % 2 === 0 ? 'bg-white/40' : 'bg-slate-50/30'}`}>
-                                                    <td className="px-3 py-4 sm:p-5 font-bold text-sm sm:text-base text-slate-800">{g.subject}</td>
+                                                <tr key={i} className={`transition-all duration-200 hover:bg-blue-50/60 ${i % 2 === 0 ? 'bg-white/40' : 'bg-slate-50/40'}`}>
+                                                    <td className="px-2 py-2 sm:p-5 font-bold text-xs sm:text-base text-slate-800">{g.subject}</td>
                                                     {termTab !== 'CN' && (
                                                         <>
-                                                            <td className="px-3 py-4 sm:p-5">
-                                                                <div className="flex flex-nowrap gap-1 sm:gap-1.5">
-                                                                    {g.tx?.map((sc, idx) => <span key={idx} className="inline-flex items-center justify-center min-w-[24px] sm:min-w-[28px] px-1 py-1 bg-white shadow-sm text-slate-700 rounded-md text-xs sm:text-sm font-bold border border-slate-200">{sc}</span>)}
-                                                                </div>
+                                                            <td className="px-1 py-2 sm:p-5 text-center">
+                                                                <span className="text-[11px] sm:text-sm font-bold text-slate-600 tracking-tighter sm:tracking-normal">
+                                                                    {g.tx?.join(', ')}
+                                                                </span>
                                                             </td>
-                                                            <td className="px-3 py-4 sm:p-5 text-center text-sm sm:text-base font-bold text-slate-700">{g.gk}</td>
-                                                            <td className="px-3 py-4 sm:p-5 text-center text-sm sm:text-base font-bold text-slate-700">{g.ck}</td>
+                                                            <td className="px-1 py-2 sm:p-5 text-center text-xs sm:text-base font-bold text-slate-700">{g.gk}</td>
+                                                            <td className="px-1 py-2 sm:p-5 text-center text-xs sm:text-base font-bold text-slate-700">{g.ck}</td>
                                                         </>
                                                     )}
-                                                    <td className={`px-3 py-4 sm:p-5 text-center text-sm sm:text-base font-black bg-blue-50/30 ${g.tbm === 'Đ' ? 'text-emerald-600' : g.tbm === 'CĐ' ? 'text-red-500' : 'text-blue-600 text-lg'}`}>
+                                                    <td className={`px-2 py-2 sm:p-5 text-center text-xs sm:text-base font-black bg-blue-50/30 ${g.tbm === 'Đ' ? 'text-emerald-600' : g.tbm === 'CĐ' ? 'text-red-500' : 'text-blue-600 sm:text-lg'}`}>
                                                         {g.tbm !== null ? g.tbm : '-'}
                                                     </td>
                                                 </tr>
