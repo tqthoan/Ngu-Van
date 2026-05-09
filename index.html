@@ -18,9 +18,9 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         * { -webkit-tap-highlight-color: transparent; }
-        body { background-color: #f8fafc; }
-        .tab-active { border-bottom-width: 3px; border-color: #2563eb; color: #1e40af; font-weight: 700; }
-        .tab-inactive { color: #64748b; font-weight: 600; }
+        body { background-color: #f8fafc; background-image: radial-gradient(at top left, #eff6ff 0%, transparent 50%), radial-gradient(at top right, #eef2ff 0%, transparent 50%); background-attachment: fixed; }
+        .glass-panel { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05); }
+        .text-gradient { background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     </style>
 </head>
 <body>
@@ -71,7 +71,7 @@
             }
         }
 
-        // Cấu hình chuẩn số cột TX theo Thông tư 22 (Vừa khít không thừa không thiếu)
+        // Cấu hình chuẩn số cột TX theo Thông tư 22
         const subjectConfig = [
             { name: "Toán học", prefix: "Toan", type: "score", txCount: 4, color: "#D9E1F2" },
             { name: "Ngữ văn", prefix: "Van", type: "score", txCount: 4, color: "#FCE4D6" },
@@ -94,21 +94,18 @@
             const [activeTab, setActiveTab] = useState('student');
             const [view, setView] = useState('login');
             
-            // State Đăng nhập
-            const [emailInput, setEmailInput] = useState('');
+            const [studentIdInput, setStudentIdInput] = useState('');
             const [studentPasswordInput, setStudentPasswordInput] = useState('');
             const [teacherClassInput, setTeacherClassInput] = useState('');
             const [teacherPasswordInput, setTeacherPasswordInput] = useState('');
             const [loginError, setLoginError] = useState('');
             
-            // State Giáo viên
             const [isUploading, setIsUploading] = useState(false);
             const fileInputRef = useRef(null);
             
-            // State View Mode
             const [currentStudentData, setCurrentStudentData] = useState(null);
-            const [termTab, setTermTab] = useState('HK2'); // Học sinh đang xem học kỳ nào
-            const [teacherClass, setTeacherClass] = useState(''); // Giáo viên đang quản lý lớp nào
+            const [termTab, setTermTab] = useState('HK2'); 
+            const [teacherClass, setTeacherClass] = useState(''); 
 
             useEffect(() => {
                 if (auth) {
@@ -140,7 +137,9 @@
                 }
 
                 if (activeTab === 'student') {
-                    const studentInfo = students.find(s => s.email.toLowerCase() === emailInput.toLowerCase());
+                    // Đăng nhập bằng Mã định danh
+                    const formattedId = studentIdInput.trim();
+                    const studentInfo = students.find(s => s.maDinhDanh === formattedId);
                     if (studentInfo) {
                         if (studentInfo.password === studentPasswordInput) {
                             setCurrentStudentData(studentInfo);
@@ -171,7 +170,7 @@
                 setView('login');
                 setCurrentStudentData(null);
                 setTeacherClass('');
-                setEmailInput('');
+                setStudentIdInput('');
                 setStudentPasswordInput('');
                 setTeacherPasswordInput('');
             };
@@ -180,11 +179,9 @@
             const downloadAppSource = () => {
                 const scriptElement = document.querySelector('script[type="text/babel"]');
                 let reactCode = scriptElement ? scriptElement.textContent : "";
-                
-                // Tự động TẮT cờ IS_DEV_ENV thành false trong file xuất ra để ẩn nút
                 reactCode = reactCode.replace('const IS_DEV_ENV = true;', 'const IS_DEV_ENV = false;');
                 
-                const htmlTemplate = `<!DOCTYPE html>\n<html lang="vi">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">\n    <title>Cổng Tra Cứu Điểm THCS Nhơn Phú</title>\n    <script src="https://cdn.tailwindcss.com"><\/script>\n    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin><\/script>\n    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin><\/script>\n    <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>\n    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"><\/script>\n    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"><\/script>\n    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"><\/script>\n    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"><\/script>\n    <style>\n        ::-webkit-scrollbar { width: 6px; height: 6px; }\n        ::-webkit-scrollbar-track { background: transparent; }\n        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }\n        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }\n        * { -webkit-tap-highlight-color: transparent; }\n        body { background-color: #f8fafc; }\n        .tab-active { border-bottom-width: 3px; border-color: #2563eb; color: #1e40af; font-weight: 700; }\n        .tab-inactive { color: #64748b; font-weight: 600; }\n    </style>\n</head>\n<body>\n    <div id="root"></div>\n    <script type="text/babel">\n${reactCode}\n    <\/script>\n</body>\n</html>`;
+                const htmlTemplate = `<!DOCTYPE html>\n<html lang="vi">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">\n    <title>Cổng Tra Cứu Điểm THCS Nhơn Phú</title>\n    <script src="https://cdn.tailwindcss.com"><\/script>\n    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin><\/script>\n    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin><\/script>\n    <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>\n    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"><\/script>\n    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"><\/script>\n    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"><\/script>\n    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"><\/script>\n    <style>\n        ::-webkit-scrollbar { width: 6px; height: 6px; }\n        ::-webkit-scrollbar-track { background: transparent; }\n        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }\n        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }\n        * { -webkit-tap-highlight-color: transparent; }\n        body { background-color: #f8fafc; background-image: radial-gradient(at top left, #eff6ff 0%, transparent 50%), radial-gradient(at top right, #eef2ff 0%, transparent 50%); background-attachment: fixed; }\n        .glass-panel { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05); }\n        .text-gradient { background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }\n    </style>\n</head>\n<body>\n    <div id="root"></div>\n    <script type="text/babel">\n${reactCode}\n    <\/script>\n</body>\n</html>`;
 
                 const blob = new Blob([htmlTemplate], { type: 'text/html;charset=utf-8' });
                 const link = document.createElement("a");
@@ -246,7 +243,7 @@
                 return { result, conduct, title };
             };
 
-            // ----- XUẤT FILE EXCEL THEO LỚP ĐƯỢC CHỈ ĐỊNH -----
+            // ----- XUẤT FILE EXCEL THEO LỚP -----
             const downloadTemplate = async () => {
                 try {
                     setIsUploading(true);
@@ -256,7 +253,7 @@
                         const sheet = workbook.addWorksheet(sheetName, { views: [{ state: 'frozen', xSplit: 5, ySplit: 1 }] });
                         
                         let columns = [
-                            { header: 'MaHS', key: 'mahs', width: 12 },
+                            { header: 'MaDinhDanh', key: 'madinhdanh', width: 16 },
                             { header: 'Email', key: 'email', width: 25 },
                             { header: 'MatKhau', key: 'matkhau', width: 12 },
                             { header: 'HoTen', key: 'hoten', width: 28 },
@@ -291,27 +288,20 @@
                             }
                         });
 
-                        // Tạo dữ liệu Mẫu Học Sinh 1 (Loại Tốt)
-                        const sampleStudent1 = ["HS001", "hs1@nhonphu.edu.vn", "123456", "Nguyễn Lê Phương Khánh", "Tốt"];
-                        // Tạo dữ liệu Mẫu Học Sinh 2 (Loại Khá)
-                        const sampleStudent2 = ["HS002", "hs2@nhonphu.edu.vn", "123456", "Phạm Thị Thảo", "Khá"];
+                        // Tạo dữ liệu Mẫu, loại bỏ MaHS, dùng MaDinhDanh
+                        const sampleStudent1 = ["0520000001", "hs1@nhonphu.edu.vn", "123456", "Nguyễn Lê Phương Khánh", "Tốt"];
+                        const sampleStudent2 = ["0520000002", "hs2@nhonphu.edu.vn", "123456", "Phạm Thị Thảo", "Khá"];
 
-                        // Đổ dữ liệu điểm cho tất cả các môn
                         subjectConfig.forEach(subj => {
                             if (subj.type === 'score') {
-                                // Điểm mẫu Học sinh 1 (Điểm cao)
                                 const tx1 = [9, 9.5, 10, 9, 10];
                                 for(let i=0; i<subj.txCount; i++) sampleStudent1.push(tx1[i]);
-                                sampleStudent1.push(9.5); // Điểm GK
-                                sampleStudent1.push(9.0); // Điểm CK
+                                sampleStudent1.push(9.5); sampleStudent1.push(9.0);
 
-                                // Điểm mẫu Học sinh 2 (Điểm trung bình khá)
                                 const tx2 = [6.5, 7, 6, 7.5, 7];
                                 for(let i=0; i<subj.txCount; i++) sampleStudent2.push(tx2[i]);
-                                sampleStudent2.push(6.5); // Điểm GK
-                                sampleStudent2.push(7.0); // Điểm CK
+                                sampleStudent2.push(6.5); sampleStudent2.push(7.0);
                             } else {
-                                // Môn Đánh giá (Pass/Fail) -> Điền "Đ" (Đạt)
                                 for(let i=0; i<subj.txCount + 2; i++) {
                                     sampleStudent1.push("Đ");
                                     sampleStudent2.push("Đ");
@@ -352,7 +342,7 @@
                 }
             };
 
-            // ----- ĐỌC FILE EXCEL & TÍNH ĐIỂM CẢ NĂM -----
+            // ----- ĐỌC FILE EXCEL TẢI LÊN -----
             const handleFileUpload = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -388,7 +378,10 @@
                                     const row = parsedRows[i];
                                     if (!row || row.length < 3 || String(row[0]).trim() === "") continue; 
                                     
-                                    const studentId = String(row[0]).trim();
+                                    // Chống lỗi Excel làm mất số 0 ở đầu Mã định danh
+                                    let madinhdanh = String(row[0]).trim();
+                                    if (madinhdanh.length === 9 && madinhdanh.startsWith('52')) madinhdanh = '0' + madinhdanh;
+                                    
                                     const conduct = String(row[4] || "");
                                     let grades = [];
                                     
@@ -407,17 +400,15 @@
                                         else { if(gk) gk = String(gk).trim().toUpperCase(); if(ck) ck = String(ck).trim().toUpperCase(); }
                                         
                                         let tbm = null;
-                                        if (subj.type === 'score') {
-                                            tbm = calculateTBM(tx, gk, ck);
-                                        } else {
-                                            tbm = ck ? ck : null; // Môn đánh giá lấy điểm CK làm TBM
-                                        }
+                                        if (subj.type === 'score') tbm = calculateTBM(tx, gk, ck);
+                                        else tbm = ck ? ck : null;
                                         
                                         grades.push({ subject: subj.name, tx, gk: gk!=null?gk:"", ck: ck!=null?ck:"", tbm, type: subj.type });
                                     });
 
                                     const summary = evaluateStudent(grades, conduct);
-                                    termData[studentId] = {
+                                    termData[madinhdanh] = {
+                                        maDinhDanh: madinhdanh,
                                         email: String(row[1] || "").trim(),
                                         password: String(row[2] || "").trim(),
                                         name: String(row[3] || "").trim(),
@@ -432,19 +423,16 @@
                             const hk1Data = parseSheet('HK I');
                             const hk2Data = parseSheet('HK II');
                             
-                            // Gộp HK1, HK2 và Tính Cả Năm
                             const newStudents = [];
                             const allStudentIds = new Set([...Object.keys(hk1Data), ...Object.keys(hk2Data)]);
 
                             allStudentIds.forEach(id => {
                                 const d1 = hk1Data[id];
                                 const d2 = hk2Data[id];
-                                const baseInfo = d2 || d1; // Ưu tiên thông tin ở sheet HK2 nếu có
+                                const baseInfo = d2 || d1; 
                                 
-                                // Bắt buộc học sinh up lên phải thuộc lớp của giáo viên đang quản lý
                                 if (!baseInfo) return;
 
-                                // Tính Cả Năm
                                 let cnGrades = [];
                                 subjectConfig.forEach(subj => {
                                     let g1 = d1 ? d1.grades.find(g => g.subject === subj.name) : null;
@@ -456,7 +444,6 @@
                                             tbm_cn = Math.round(((g1.tbm + g2.tbm * 2) / 3) * 10) / 10;
                                         }
                                     } else {
-                                        // Môn Đánh giá: Nếu HK2 Đạt thì Cả năm Đạt
                                         if (g2 && g2.ck === 'Đ') tbm_cn = 'Đ';
                                         else if (g2 && g2.ck === 'CĐ') tbm_cn = 'CĐ';
                                     }
@@ -467,7 +454,7 @@
                                 const cnSummary = evaluateStudent(cnGrades, cnConduct);
 
                                 newStudents.push({
-                                    id: id, email: baseInfo.email, password: baseInfo.password, name: baseInfo.name, class: teacherClass,
+                                    maDinhDanh: id, email: baseInfo.email, password: baseInfo.password, name: baseInfo.name, class: teacherClass,
                                     schoolYear: "2025 - 2026",
                                     hk1: d1 ? { conduct: d1.conduct, grades: d1.grades, summary: d1.summary } : null,
                                     hk2: d2 ? { conduct: d2.conduct, grades: d2.grades, summary: d2.summary } : null,
@@ -475,11 +462,11 @@
                                 });
                             });
 
-                            if (newStudents.length === 0) { alert("File không có dữ liệu hoặc tên Sheet không đúng (Yêu cầu sheet tên 'HK I' và 'HK II')."); setIsUploading(false); return; }
+                            if (newStudents.length === 0) { alert("File không có dữ liệu hợp lệ."); setIsUploading(false); return; }
 
                             const colRef = db.collection('students_data_2025_2026');
                             for (const student of newStudents) {
-                                await colRef.doc(`${teacherClass}_${student.id}`).set(student);
+                                await colRef.doc(`${teacherClass}_${student.maDinhDanh}`).set(student);
                             }
                             
                             alert(`Hoàn tất cập nhật ${newStudents.length} học sinh cho lớp ${teacherClass}.`);
@@ -502,129 +489,135 @@
                 }
             };
 
-            // Giáo viên chỉ thấy học sinh lớp mình
             const myClassStudents = students.filter(s => s.class === teacherClass);
 
-            // ----- GIAO DIỆN ĐĂNG NHẬP -----
+            // ==========================================
+            // GIAO DIỆN ĐĂNG NHẬP
+            // ==========================================
             if (view === 'login') {
                 return (
-                    <div className="min-h-[100dvh] bg-slate-50 flex items-center justify-center p-4 font-sans text-slate-800">
-                        <div className="max-w-md w-full bg-white sm:rounded-3xl rounded-2xl shadow-xl p-6 sm:p-8 border border-slate-100">
+                    <div className="min-h-[100dvh] flex items-center justify-center p-4 font-sans text-slate-800">
+                        <div className="glass-panel max-w-md w-full sm:rounded-3xl rounded-2xl p-6 sm:p-8">
                             <div className="text-center mb-8">
-                                <div className="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg"><GraduationCap size={32} className="text-white" /></div>
-                                <h1 className="text-2xl font-bold text-slate-900">THCS Nhơn Phú</h1>
-                                <p className="text-slate-500 mt-1">Hệ thống Quản lý & Tra cứu Điểm</p>
+                                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                                    <GraduationCap size={32} className="text-white" />
+                                </div>
+                                <h1 className="text-2xl sm:text-3xl font-extrabold text-gradient">THCS Nhơn Phú</h1>
+                                <p className="text-slate-500 mt-2 font-medium">Hệ thống Quản lý & Tra cứu Điểm</p>
                             </div>
-                            <div className="flex p-1 bg-slate-100 rounded-2xl mb-8">
-                                <button onClick={() => { setActiveTab('student'); setLoginError(''); }} className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all ${activeTab === 'student' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>Học Sinh</button>
-                                <button onClick={() => { setActiveTab('teacher'); setLoginError(''); }} className={`flex-1 py-2.5 text-sm font-semibold rounded-xl flex justify-center items-center gap-1 transition-all ${activeTab === 'teacher' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>Giáo Viên <ShieldCheck size={14} /></button>
+                            
+                            <div className="flex bg-slate-100/80 p-1.5 rounded-2xl mb-8 backdrop-blur-sm">
+                                <button onClick={() => { setActiveTab('student'); setLoginError(''); }} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${activeTab === 'student' ? 'bg-white text-blue-600 shadow-sm scale-100' : 'text-slate-500 hover:text-slate-700 scale-95'}`}>Học Sinh</button>
+                                <button onClick={() => { setActiveTab('teacher'); setLoginError(''); }} className={`flex-1 py-2.5 text-sm font-bold rounded-xl flex justify-center items-center gap-1 transition-all duration-300 ${activeTab === 'teacher' ? 'bg-white text-blue-600 shadow-sm scale-100' : 'text-slate-500 hover:text-slate-700 scale-95'}`}>Giáo Viên <ShieldCheck size={14} /></button>
                             </div>
-                            <form onSubmit={handleLogin} className="space-y-5">
+
+                            <form onSubmit={handleLogin} className="space-y-4">
                                 {activeTab === 'student' ? (
                                     <>
-                                        <div className="relative">
-                                            <div className="absolute left-4 top-3.5 text-slate-400"><User size={18} /></div>
-                                            <input type="email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Email học sinh" required />
+                                        <div className="relative group">
+                                            <div className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-blue-500 transition-colors"><User size={18} /></div>
+                                            <input type="text" value={studentIdInput} onChange={(e) => setStudentIdInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-white/80 border border-slate-200/60 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-mono backdrop-blur-sm shadow-inner" placeholder="Mã định danh (VD: 052...)" required />
                                         </div>
-                                        <div className="relative mt-4">
-                                            <div className="absolute left-4 top-3.5 text-slate-400"><ShieldCheck size={18} /></div>
-                                            <input type="password" value={studentPasswordInput} onChange={(e) => setStudentPasswordInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Mật khẩu tra cứu" required />
+                                        <div className="relative group mt-4">
+                                            <div className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-blue-500 transition-colors"><ShieldCheck size={18} /></div>
+                                            <input type="password" value={studentPasswordInput} onChange={(e) => setStudentPasswordInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-white/80 border border-slate-200/60 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all backdrop-blur-sm shadow-inner" placeholder="Mật khẩu tra cứu" required />
                                         </div>
                                     </>
                                 ) : (
                                     <>
-                                        <div className="relative">
-                                            <div className="absolute left-4 top-3.5 text-slate-400"><User size={18} /></div>
-                                            <input type="text" value={teacherClassInput} onChange={(e) => setTeacherClassInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all uppercase" placeholder="Tên đăng nhập (Ví dụ: 6A1)" required />
+                                        <div className="relative group">
+                                            <div className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-blue-500 transition-colors"><User size={18} /></div>
+                                            <input type="text" value={teacherClassInput} onChange={(e) => setTeacherClassInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-white/80 border border-slate-200/60 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all uppercase font-bold backdrop-blur-sm shadow-inner" placeholder="Tên đăng nhập lớp (VD: 6A1)" required />
                                         </div>
-                                        <div className="relative mt-4">
-                                            <div className="absolute left-4 top-3.5 text-slate-400"><ShieldCheck size={18} /></div>
-                                            <input type="password" value={teacherPasswordInput} onChange={(e) => setTeacherPasswordInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Mật khẩu Giáo viên" required />
+                                        <div className="relative group mt-4">
+                                            <div className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-blue-500 transition-colors"><ShieldCheck size={18} /></div>
+                                            <input type="password" value={teacherPasswordInput} onChange={(e) => setTeacherPasswordInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-white/80 border border-slate-200/60 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all backdrop-blur-sm shadow-inner" placeholder="Mật khẩu Giáo viên" required />
                                         </div>
                                     </>
                                 )}
-                                {loginError && <p className="text-sm text-red-500 font-medium ml-1 bg-red-50 p-2 rounded-lg">{loginError}</p>}
-                                <button type="submit" className="w-full py-3.5 text-white bg-blue-600 hover:bg-blue-700 rounded-2xl font-semibold transition-all shadow-md active:scale-95">
-                                    {activeTab === 'student' ? 'Tra Cứu Điểm' : 'Quản Lý Lớp'}
+                                {loginError && <p className="text-sm text-red-500 font-bold ml-1 bg-red-50 p-2.5 rounded-xl border border-red-100">{loginError}</p>}
+                                <button type="submit" className="w-full mt-2 py-3.5 text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-2xl font-bold transition-all duration-300 shadow-[0_8px_20px_rgb(37,99,235,0.25)] hover:shadow-[0_10px_25px_rgb(37,99,235,0.35)] active:scale-[0.98]">
+                                    {activeTab === 'student' ? 'Đăng Nhập Tra Cứu' : 'Quản Lý Lớp Học'}
                                 </button>
                             </form>
                             
-                            <div className="mt-8 text-center border-t border-slate-100 pt-6">
-                                {/* HIỂN THỊ NÚT XUẤT SOURCE CODE NẾU ĐANG Ở TRÊN CANVAS */}
-                                {IS_DEV_ENV ? (
-                                    <button type="button" onClick={downloadAppSource} className="text-sm text-slate-500 hover:text-blue-600 font-medium transition-colors flex items-center justify-center w-full gap-2 p-2 rounded-xl hover:bg-slate-50 mb-4">
-                                        <Download size={16} /> Tải Mã Nguồn (index.html) để Up Host
+                            <div className="mt-8 text-center border-t border-slate-200/60 pt-6">
+                                {IS_DEV_ENV && (
+                                    <button type="button" onClick={downloadAppSource} className="text-sm text-blue-600 font-bold transition-colors flex items-center justify-center w-full gap-2 p-3 rounded-xl bg-blue-50/50 hover:bg-blue-100/50 mb-4 border border-blue-100">
+                                        <Download size={18} /> Tải Mã Nguồn (index.html) Up Host
                                     </button>
-                                ) : null}
-                                <div className="text-xs text-slate-400 font-medium">Bản quyền thuộc trường THCS Nhơn Phú - Năm 2025</div>
+                                )}
+                                <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Bản quyền THCS Nhơn Phú • 2025-2026</div>
                             </div>
                         </div>
                     </div>
                 );
             }
 
-            // ----- GIAO DIỆN GIÁO VIÊN -----
+            // ==========================================
+            // GIAO DIỆN GIÁO VIÊN
+            // ==========================================
             if (view === 'admin_view') {
                 return (
-                    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-0 sm:pb-12">
-                        <header className="bg-slate-900 text-white h-16 flex items-center px-4 sm:px-6 justify-between sticky top-0 z-50 shadow-md">
-                            <div className="font-bold flex items-center gap-2">
-                                <ShieldCheck className="text-blue-400" size={24} />
-                                <span className="hidden sm:inline">Portal Giáo Viên - Lớp {teacherClass}</span><span className="sm:hidden">Lớp {teacherClass}</span>
+                    <div className="min-h-screen font-sans text-slate-800 pb-0 sm:pb-12">
+                        <header className="glass-panel h-16 flex items-center px-4 sm:px-6 justify-between sticky top-0 z-50 rounded-none sm:rounded-b-3xl sm:mx-4 mt-0 sm:mt-2 shadow-sm">
+                            <div className="font-extrabold flex items-center gap-2 text-gradient">
+                                <ShieldCheck className="text-blue-600" size={24} />
+                                <span className="hidden sm:inline text-lg">Portal Giáo Viên - Lớp {teacherClass}</span><span className="sm:hidden text-lg">Lớp {teacherClass}</span>
                             </div>
-                            <button onClick={handleLogout} className="text-sm bg-white/10 px-3 py-2 rounded-xl flex items-center gap-2 hover:bg-white/20 transition-colors"><LogOut size={16} /> Thoát</button>
+                            <button onClick={handleLogout} className="text-sm font-bold text-slate-600 bg-slate-100/80 px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-red-50 hover:text-red-600 transition-colors"><LogOut size={16} /> Thoát</button>
                         </header>
-                        <main className="max-w-6xl mx-auto px-0 sm:px-4 mt-0 sm:mt-8">
-                            <div className="p-4 sm:p-0 flex flex-col md:flex-row justify-between items-start md:items-center mb-0 sm:mb-6 gap-4 bg-white sm:bg-transparent border-b sm:border-none">
+                        
+                        <main className="max-w-6xl mx-auto px-0 sm:px-4 mt-4 sm:mt-8">
+                            <div className="p-4 sm:p-0 flex flex-col md:flex-row justify-between items-start md:items-center mb-4 sm:mb-6 gap-4">
                                 <div>
-                                    <h2 className="text-xl sm:text-2xl font-bold">Danh sách học sinh lớp {teacherClass}</h2>
-                                    <p className="text-slate-500 text-xs sm:text-sm mt-1">Dữ liệu được quản lý bảo mật theo từng lớp.</p>
+                                    <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Danh sách học sinh</h2>
+                                    <p className="text-slate-500 text-sm mt-1 font-medium">Quản lý bảo mật cho lớp {teacherClass}.</p>
                                 </div>
-                                <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-                                    <button onClick={downloadTemplate} disabled={isUploading} className="w-full sm:w-auto px-4 py-2.5 hover:bg-slate-200 border flex items-center justify-center gap-2 transition-colors text-slate-700 rounded-xl font-bold bg-white shadow-sm min-w-[130px]">
-                                        <FileSpreadsheet size={16} /> {isUploading ? 'Đang xử lý...' : 'Tải File Mẫu (Đủ môn)'}
+                                <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
+                                    <button onClick={downloadTemplate} disabled={isUploading} className="w-full sm:w-auto px-5 py-3 glass-panel hover:bg-white flex items-center justify-center gap-2 transition-all text-slate-700 rounded-xl font-bold shadow-sm">
+                                        <FileSpreadsheet size={18} className="text-emerald-600" /> {isUploading ? 'Đang xử lý...' : 'Tải File Mẫu Lớp'}
                                     </button>
                                     <input type="file" accept=".xlsx" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
-                                    <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm transition-colors active:scale-95"><Upload size={16} /> Cập Nhật Điểm Lên Hệ Thống</button>
+                                    <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="w-full sm:w-auto justify-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all active:scale-95">
+                                        <Upload size={18} /> Cập Nhật Điểm Lên Hệ Thống
+                                    </button>
                                 </div>
                             </div>
 
-                            <div className="bg-white sm:rounded-3xl shadow-sm border-b sm:border border-slate-200 overflow-hidden">
+                            <div className="glass-panel sm:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
                                 <div className="overflow-x-auto w-full">
                                     <table className="w-full text-left whitespace-nowrap">
-                                        <thead className="bg-slate-50">
+                                        <thead className="bg-slate-50/80 border-b border-slate-200">
                                             <tr>
-                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Mã HS / Mật khẩu</th>
-                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Họ Tên / Email</th>
-                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider text-center">HK I</th>
-                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider text-center">HK II</th>
-                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider text-center">Cả Năm</th>
-                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Danh hiệu</th>
-                                                <th className="p-3 sm:p-4"></th>
+                                                <th className="p-4 text-xs font-extrabold text-slate-500 uppercase tracking-wider">Định danh / Pass</th>
+                                                <th className="p-4 text-xs font-extrabold text-slate-500 uppercase tracking-wider">Họ Tên</th>
+                                                <th className="p-4 text-xs font-extrabold text-slate-500 uppercase tracking-wider text-center">HK I</th>
+                                                <th className="p-4 text-xs font-extrabold text-slate-500 uppercase tracking-wider text-center">HK II</th>
+                                                <th className="p-4 text-xs font-extrabold text-blue-600 uppercase tracking-wider text-center bg-blue-50/50">Cả Năm</th>
+                                                <th className="p-4 text-xs font-extrabold text-slate-500 uppercase tracking-wider">Danh hiệu</th>
+                                                <th className="p-4"></th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-100">
-                                            {myClassStudents.map(s => (
-                                                <tr key={s.id} className="hover:bg-slate-50 transition-colors">
-                                                    <td className="p-3 sm:p-4">
-                                                        <div className="font-bold text-slate-800 text-sm">{s.id}</div>
-                                                        <div className="text-[10px] sm:text-xs text-slate-400 font-mono">Pass: {s.password}</div>
+                                            {myClassStudents.map((s, i) => (
+                                                <tr key={s.maDinhDanh} className={`transition-colors hover:bg-blue-50/60 ${i % 2 === 0 ? 'bg-white/40' : 'bg-slate-50/30'}`}>
+                                                    <td className="p-4">
+                                                        <div className="font-bold text-slate-800 text-sm font-mono">{s.maDinhDanh}</div>
+                                                        <div className="text-[11px] text-slate-500 font-mono mt-0.5">Pass: <span className="font-semibold text-slate-700">{s.password}</span></div>
                                                     </td>
-                                                    <td className="p-3 sm:p-4">
-                                                        <div className="font-semibold text-slate-800 text-sm">{s.name}</div>
-                                                        <div className="text-[10px] sm:text-xs text-slate-400">{s.email}</div>
-                                                    </td>
-                                                    <td className="p-3 sm:p-4 text-center text-sm font-medium text-slate-600">{s.hk1?.summary?.result || '-'}</td>
-                                                    <td className="p-3 sm:p-4 text-center text-sm font-medium text-slate-600">{s.hk2?.summary?.result || '-'}</td>
-                                                    <td className="p-3 sm:p-4 font-bold text-blue-600 text-center text-sm bg-blue-50/20">{s.cn.summary.result}</td>
-                                                    <td className="p-3 sm:p-4 text-sm text-amber-600 font-bold">{s.cn.summary.title}</td>
-                                                    <td className="p-3 sm:p-4 text-right">
-                                                        <button onClick={() => handleDeleteStudent(`${teacherClass}_${s.id}`)} className="text-slate-400 p-2 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                                                    <td className="p-4 font-bold text-slate-800 text-sm">{s.name}</td>
+                                                    <td className="p-4 text-center text-sm font-semibold text-slate-600">{s.hk1?.summary?.result || '-'}</td>
+                                                    <td className="p-4 text-center text-sm font-semibold text-slate-600">{s.hk2?.summary?.result || '-'}</td>
+                                                    <td className="p-4 font-black text-blue-600 text-center text-sm bg-blue-50/30">{s.cn.summary.result}</td>
+                                                    <td className="p-4 text-sm text-amber-600 font-bold">{s.cn.summary.title}</td>
+                                                    <td className="p-4 text-right">
+                                                        <button onClick={() => handleDeleteStudent(`${teacherClass}_${s.maDinhDanh}`)} className="text-slate-400 p-2 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"><Trash2 size={18}/></button>
                                                     </td>
                                                 </tr>
                                             ))}
                                             {myClassStudents.length === 0 && (
-                                                <tr><td colSpan="7" className="p-8 text-center text-slate-500">Lớp {teacherClass} chưa có dữ liệu. Vui lòng Tải File Mẫu và điền điểm để cập nhật.</td></tr>
+                                                <tr><td colSpan="7" className="p-12 text-center text-slate-500 font-medium">Lớp {teacherClass} chưa có dữ liệu. Vui lòng tải File Mẫu, điền điểm và up lên.</td></tr>
                                             )}
                                         </tbody>
                                     </table>
@@ -635,96 +628,106 @@
                 );
             }
 
-            // ----- GIAO DIỆN HỌC SINH -----
+            // ==========================================
+            // GIAO DIỆN HỌC SINH
+            // ==========================================
             const user = currentStudentData;
-            // Xác định dữ liệu đang hiển thị dựa vào tab đang chọn
             const displayData = termTab === 'HK1' ? user.hk1 : (termTab === 'HK2' ? user.hk2 : user.cn);
 
             return (
-                <div className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-0 sm:pb-12">
-                    <header className="bg-white shadow-sm h-16 flex items-center px-4 sm:px-6 justify-between sticky top-0 z-50">
-                        <div className="font-bold flex items-center gap-2"><GraduationCap className="text-blue-600" size={24}/><span className="text-lg">THCS Nhơn Phú</span></div>
-                        <button onClick={handleLogout} className="text-sm font-bold text-slate-500 hover:text-red-500 flex items-center gap-2 transition-colors bg-slate-50 px-3 py-1.5 rounded-full border"><LogOut size={16} /> <span className="hidden sm:inline">Đăng xuất</span></button>
+                <div className="min-h-screen font-sans text-slate-800 pb-0 sm:pb-12">
+                    <header className="glass-panel h-16 flex items-center px-4 sm:px-6 justify-between sticky top-0 z-50 rounded-none sm:rounded-b-3xl sm:mx-4 mt-0 sm:mt-2 shadow-sm">
+                        <div className="font-extrabold flex items-center gap-2 text-gradient"><GraduationCap className="text-blue-600" size={26}/><span className="text-lg">THCS Nhơn Phú</span></div>
+                        <button onClick={handleLogout} className="text-sm font-bold text-slate-600 hover:text-red-600 flex items-center gap-2 transition-colors bg-slate-100/80 hover:bg-red-50 px-4 py-2 rounded-xl"><LogOut size={16} /> <span className="hidden sm:inline">Đăng xuất</span></button>
                     </header>
-                    <main className="max-w-5xl mx-auto px-0 sm:px-4 mt-0 sm:mt-8">
-                        <div className="bg-white sm:rounded-3xl p-5 sm:p-8 shadow-sm border-b sm:border border-slate-200 mb-2 sm:mb-6 flex flex-col md:flex-row gap-5 items-start md:items-center justify-between">
-                            <div className="flex items-center gap-4 w-full">
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-md shrink-0 border-2 border-white">{user.name.charAt(0)}</div>
+                    
+                    <main className="max-w-5xl mx-auto px-0 sm:px-4 mt-4 sm:mt-8">
+                        {/* HEADER THÔNG TIN */}
+                        <div className="glass-panel sm:rounded-3xl p-5 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-6 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between border-b sm:border border-slate-200/50">
+                            <div className="flex items-center gap-5 w-full">
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-black text-3xl shadow-lg shadow-blue-500/30 shrink-0 border-2 border-white/50">{user.name.charAt(0)}</div>
                                 <div className="flex-1">
-                                    <h2 className="text-xl sm:text-3xl font-bold mb-1 leading-tight text-slate-900">{user.name}</h2>
-                                    <p className="text-slate-500 text-xs sm:text-sm font-semibold flex items-center gap-1.5 flex-wrap">
-                                        <span className="bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1"><User size={12}/> Lớp: {user.class}</span> 
-                                        <span className="bg-slate-100 px-2 py-0.5 rounded">Năm: 2025-2026</span>
-                                    </p>
+                                    <h2 className="text-2xl sm:text-3xl font-extrabold mb-2 leading-tight text-slate-800">{user.name}</h2>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="bg-slate-100/80 px-2.5 py-1 rounded-lg flex items-center gap-1.5 text-xs font-bold text-slate-600"><User size={14}/> {user.class}</span> 
+                                        <span className="bg-blue-50 px-2.5 py-1 rounded-lg text-xs font-bold text-blue-700 font-mono border border-blue-100">ID: {user.maDinhDanh}</span> 
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* --- TAB CHỌN KỲ HỌC --- */}
-                        <div className="flex bg-white px-4 sm:px-6 border-b border-slate-200 shadow-sm sm:rounded-t-3xl">
-                            <button onClick={()=>setTermTab('HK1')} className={`flex-1 py-4 text-center cursor-pointer transition-colors ${termTab==='HK1'?'tab-active':'tab-inactive hover:bg-slate-50'}`}>HỌC KỲ I</button>
-                            <button onClick={()=>setTermTab('HK2')} className={`flex-1 py-4 text-center cursor-pointer transition-colors ${termTab==='HK2'?'tab-active':'tab-inactive hover:bg-slate-50'}`}>HỌC KỲ II</button>
-                            <button onClick={()=>setTermTab('CN')} className={`flex-1 py-4 text-center cursor-pointer transition-colors ${termTab==='CN'?'tab-active':'tab-inactive hover:bg-slate-50'}`}>CẢ NĂM</button>
+                        {/* --- TAB CHỌN KỲ HỌC (THIẾT KẾ NỔI HIỆN ĐẠI) --- */}
+                        <div className="flex bg-slate-200/50 p-1.5 rounded-2xl mx-4 sm:mx-8 mb-6 backdrop-blur-md shadow-inner">
+                            {['HK1', 'HK2', 'CN'].map(tab => (
+                                <button 
+                                    key={tab} 
+                                    onClick={()=>setTermTab(tab)} 
+                                    className={`flex-1 py-3 text-center rounded-xl transition-all duration-300 font-extrabold text-sm sm:text-base ${termTab === tab ? 'bg-white text-blue-600 shadow-md scale-100' : 'text-slate-500 hover:text-slate-700 hover:bg-white/40 scale-[0.98]'}`}
+                                >
+                                    {tab === 'CN' ? 'CẢ NĂM' : `HỌC KỲ ${tab === 'HK1' ? 'I' : 'II'}`}
+                                </button>
+                            ))}
                         </div>
                         
                         {!displayData ? (
-                            <div className="bg-white p-8 text-center text-slate-500 font-medium sm:rounded-b-3xl border-b sm:border border-slate-200">
+                            <div className="glass-panel p-10 text-center text-slate-500 font-bold sm:rounded-3xl border-y sm:border border-slate-200/50 shadow-sm">
                                 Chưa có dữ liệu điểm cho {termTab === 'HK1' ? 'Học kỳ I' : (termTab === 'HK2' ? 'Học kỳ II' : 'Cả Năm')}.
                             </div>
                         ) : (
-                            <div className="bg-white sm:rounded-b-3xl shadow-sm border-b sm:border border-t-0 border-slate-200 overflow-hidden">
+                            <div className="glass-panel sm:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-b sm:border border-t-0 border-slate-200/50 overflow-hidden">
                                 
-                                {/* Tổng kết */}
-                                <div className="grid grid-cols-3 gap-0 border-b border-slate-100">
-                                    <div className="bg-slate-50 p-4 border-r border-slate-100 text-center">
-                                        <p className="text-[10px] text-slate-500 font-bold mb-0.5 uppercase">Rèn luyện</p>
-                                        <p className="text-base sm:text-xl font-bold text-slate-800">{displayData.conduct || '-'}</p>
+                                {/* TỔNG KẾT */}
+                                <div className="grid grid-cols-3 gap-0 border-b border-slate-200/50">
+                                    <div className="bg-slate-50/50 p-4 sm:p-6 border-r border-slate-200/50 text-center">
+                                        <p className="text-[10px] sm:text-xs text-slate-500 font-extrabold mb-1 uppercase tracking-wider">Rèn luyện</p>
+                                        <p className="text-lg sm:text-2xl font-black text-slate-800">{displayData.conduct || '-'}</p>
                                     </div>
-                                    <div className="bg-blue-50/50 p-4 border-r border-slate-100 text-center">
-                                        <p className="text-[10px] text-blue-600 font-bold mb-0.5 uppercase">Học tập</p>
-                                        <p className="text-base sm:text-xl font-bold text-blue-700">{displayData.summary.result}</p>
+                                    <div className="bg-blue-50/40 p-4 sm:p-6 border-r border-slate-200/50 text-center">
+                                        <p className="text-[10px] sm:text-xs text-blue-600 font-extrabold mb-1 uppercase tracking-wider">Học tập</p>
+                                        <p className="text-lg sm:text-2xl font-black text-blue-700">{displayData.summary.result}</p>
                                     </div>
-                                    <div className="bg-amber-50/50 p-4 text-center flex flex-col justify-center">
-                                        <p className="text-[10px] text-amber-600 font-bold mb-0.5 uppercase">Danh hiệu</p>
-                                        <p className="text-sm font-bold text-amber-700 leading-tight">{displayData.summary.title}</p>
+                                    <div className="bg-amber-50/40 p-4 sm:p-6 text-center flex flex-col justify-center">
+                                        <p className="text-[10px] sm:text-xs text-amber-600 font-extrabold mb-1 uppercase tracking-wider">Danh hiệu</p>
+                                        <p className="text-sm sm:text-xl font-black text-amber-600 leading-tight drop-shadow-sm">{displayData.summary.title}</p>
                                     </div>
                                 </div>
 
-                                <div className="p-3 border-b bg-slate-50/80 flex items-center gap-2">
-                                    <Activity className="text-blue-600" size={18}/>
-                                    <span className="font-bold text-slate-800 text-sm">Bảng điểm chi tiết ({termTab})</span>
+                                <div className="p-4 sm:p-5 border-b border-slate-200/50 bg-white/40 flex items-center gap-3">
+                                    <div className="p-2 bg-blue-100 rounded-lg text-blue-600"><Activity size={18}/></div>
+                                    <span className="font-extrabold text-slate-800">Bảng điểm chi tiết</span>
                                 </div>
+
                                 <div className="overflow-x-auto w-full">
                                     <table className="w-full text-left whitespace-nowrap">
-                                        <thead className="bg-white border-b border-slate-100">
+                                        <thead className="bg-slate-50/80 border-b border-slate-200/80">
                                             <tr>
-                                                <th className="px-2 py-3 sm:p-4 text-[10px] sm:text-sm font-bold text-slate-500 uppercase">Môn học</th>
+                                                <th className="px-3 py-4 sm:p-5 text-[11px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider">Môn học</th>
                                                 {termTab !== 'CN' && (
                                                     <>
-                                                        <th className="px-2 py-3 sm:p-4 text-[10px] sm:text-sm font-bold text-slate-500 uppercase">Đ.Thường xuyên</th>
-                                                        <th className="px-2 py-3 sm:p-4 text-[10px] sm:text-sm font-bold text-slate-500 uppercase text-center">G.Kỳ</th>
-                                                        <th className="px-2 py-3 sm:p-4 text-[10px] sm:text-sm font-bold text-slate-500 uppercase text-center">C.Kỳ</th>
+                                                        <th className="px-3 py-4 sm:p-5 text-[11px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider">Đ.Thường xuyên</th>
+                                                        <th className="px-3 py-4 sm:p-5 text-[11px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider text-center">Giữa Kỳ</th>
+                                                        <th className="px-3 py-4 sm:p-5 text-[11px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider text-center">Cuối Kỳ</th>
                                                     </>
                                                 )}
-                                                <th className="px-2 py-3 sm:p-4 text-[10px] sm:text-sm font-bold text-blue-600 uppercase text-center bg-blue-50/50">TBM</th>
+                                                <th className="px-3 py-4 sm:p-5 text-[11px] sm:text-sm font-extrabold text-blue-600 uppercase tracking-wider text-center bg-blue-50/50">TBM</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-100">
                                             {displayData.grades?.map((g, i) => (
-                                                <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                                                    <td className="px-2 py-3 sm:p-4 font-bold text-xs sm:text-sm text-slate-800">{g.subject}</td>
+                                                <tr key={i} className={`transition-all duration-200 hover:bg-blue-50/60 ${i % 2 === 0 ? 'bg-white/40' : 'bg-slate-50/30'}`}>
+                                                    <td className="px-3 py-4 sm:p-5 font-bold text-sm sm:text-base text-slate-800">{g.subject}</td>
                                                     {termTab !== 'CN' && (
                                                         <>
-                                                            <td className="px-2 py-3 sm:p-4">
-                                                                <div className="flex flex-nowrap gap-0.5 sm:gap-1">
-                                                                    {g.tx?.map((sc, idx) => <span key={idx} className="inline-flex items-center justify-center min-w-[22px] px-1 py-0.5 bg-slate-100 text-slate-700 rounded text-xs sm:text-sm font-bold border border-slate-200/50">{sc}</span>)}
+                                                            <td className="px-3 py-4 sm:p-5">
+                                                                <div className="flex flex-nowrap gap-1 sm:gap-1.5">
+                                                                    {g.tx?.map((sc, idx) => <span key={idx} className="inline-flex items-center justify-center min-w-[24px] sm:min-w-[28px] px-1 py-1 bg-white shadow-sm text-slate-700 rounded-md text-xs sm:text-sm font-bold border border-slate-200">{sc}</span>)}
                                                                 </div>
                                                             </td>
-                                                            <td className="px-2 py-3 sm:p-4 text-center text-xs sm:text-sm font-bold text-slate-700">{g.gk}</td>
-                                                            <td className="px-2 py-3 sm:p-4 text-center text-xs sm:text-sm font-bold text-slate-700">{g.ck}</td>
+                                                            <td className="px-3 py-4 sm:p-5 text-center text-sm sm:text-base font-bold text-slate-700">{g.gk}</td>
+                                                            <td className="px-3 py-4 sm:p-5 text-center text-sm sm:text-base font-bold text-slate-700">{g.ck}</td>
                                                         </>
                                                     )}
-                                                    <td className={`px-2 py-3 sm:p-4 text-center text-xs sm:text-sm font-black bg-blue-50/30 ${g.tbm === 'Đ' ? 'text-emerald-600' : g.tbm === 'CĐ' ? 'text-red-500' : 'text-blue-700'}`}>
+                                                    <td className={`px-3 py-4 sm:p-5 text-center text-sm sm:text-base font-black bg-blue-50/30 ${g.tbm === 'Đ' ? 'text-emerald-600' : g.tbm === 'CĐ' ? 'text-red-500' : 'text-blue-600 text-lg'}`}>
                                                         {g.tbm !== null ? g.tbm : '-'}
                                                     </td>
                                                 </tr>
@@ -732,7 +735,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <div className="p-3 text-[10px] sm:text-xs text-slate-400 text-center border-t border-slate-100 bg-slate-50 uppercase font-semibold tracking-wide">
+                                <div className="p-4 text-[10px] sm:text-xs text-slate-400 text-center border-t border-slate-200/50 bg-slate-50/50 uppercase font-bold tracking-widest">
                                     Đánh giá theo Thông tư 22/2021/TT-BGDĐT
                                 </div>
                             </div>
