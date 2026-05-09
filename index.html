@@ -662,33 +662,33 @@
 
             return (
                 <div className="min-h-screen font-sans text-slate-800 pb-0 sm:pb-12">
-                    <header className="glass-panel h-16 flex items-center px-4 sm:px-6 justify-between sticky top-0 z-50 rounded-none sm:rounded-b-3xl sm:mx-4 mt-0 sm:mt-2 shadow-sm">
-                        <div className="font-extrabold flex items-center gap-2 text-gradient"><GraduationCap className="text-blue-600" size={26}/><span className="text-lg">THCS Nhơn Phú</span></div>
-                        <button onClick={handleLogout} className="text-sm font-bold text-slate-600 hover:text-red-600 flex items-center gap-2 transition-colors bg-slate-100/80 hover:bg-red-50 px-4 py-2 rounded-xl"><LogOut size={16} /> <span className="hidden sm:inline">Đăng xuất</span></button>
+                    <header className="glass-panel h-14 sm:h-16 flex items-center px-3 sm:px-6 justify-between sticky top-0 z-50 rounded-none sm:rounded-b-3xl sm:mx-4 mt-0 sm:mt-2 shadow-sm">
+                        <div className="font-extrabold flex items-center gap-1.5 sm:gap-2 text-gradient"><GraduationCap className="text-blue-600 w-5 h-5 sm:w-[26px] sm:h-[26px]"/><span className="text-base sm:text-lg">THCS Nhơn Phú</span></div>
+                        <button onClick={handleLogout} className="text-xs sm:text-sm font-bold text-slate-600 hover:text-red-600 flex items-center gap-1.5 sm:gap-2 transition-colors bg-slate-100/80 hover:bg-red-50 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl"><LogOut size={14} className="sm:w-4 sm:h-4" /> <span className="hidden sm:inline">Đăng xuất</span></button>
                     </header>
                     
-                    <main className="max-w-5xl mx-auto px-0 sm:px-4 mt-4 sm:mt-8">
-                        {/* HEADER THÔNG TIN */}
-                        <div className="glass-panel sm:rounded-3xl p-5 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-6 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between border-b sm:border border-slate-200/50">
-                            <div className="flex items-center gap-5 w-full">
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-black text-3xl shadow-lg shadow-blue-500/30 shrink-0 border-2 border-white/50">{user.name.charAt(0)}</div>
+                    <main className="max-w-5xl mx-auto px-1 sm:px-4 mt-2 sm:mt-8">
+                        {/* HEADER THÔNG TIN - ÉP NÉN MOBILE */}
+                        <div className="glass-panel rounded-2xl sm:rounded-3xl p-3 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-2 sm:mb-6 flex flex-col md:flex-row gap-3 sm:gap-6 items-start md:items-center justify-between border-b sm:border border-slate-200/50">
+                            <div className="flex items-center gap-3 sm:gap-5 w-full">
+                                <div className="w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white font-black text-xl sm:text-3xl shadow-md sm:shadow-lg shadow-blue-500/30 shrink-0 border border-white/50">{user.name.charAt(0)}</div>
                                 <div className="flex-1">
-                                    <h2 className="text-2xl sm:text-3xl font-extrabold mb-2 leading-tight text-slate-800">{user.name}</h2>
-                                    <div className="flex flex-wrap gap-2">
-                                        <span className="bg-slate-100/80 px-2.5 py-1 rounded-lg flex items-center gap-1.5 text-xs font-bold text-slate-600"><User size={14}/> {user.class}</span> 
-                                        <span className="bg-blue-50 px-2.5 py-1 rounded-lg text-xs font-bold text-blue-700 font-mono border border-blue-100">ID: {user.maDinhDanh}</span> 
+                                    <h2 className="text-lg sm:text-3xl font-extrabold mb-1 sm:mb-2 leading-tight text-slate-800">{user.name}</h2>
+                                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                                        <span className="bg-slate-100/80 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg flex items-center gap-1 text-[10px] sm:text-xs font-bold text-slate-600"><User size={12}/> {user.class}</span> 
+                                        <span className="bg-blue-50 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-bold text-blue-700 font-mono border border-blue-100">ID: {user.maDinhDanh}</span> 
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* --- TAB CHỌN KỲ HỌC (THIẾT KẾ NỔI HIỆN ĐẠI) --- */}
-                        <div className="flex bg-slate-200/50 p-1.5 rounded-2xl mx-4 sm:mx-8 mb-6 backdrop-blur-md shadow-inner">
+                        {/* --- TAB CHỌN KỲ HỌC - ÉP NÉN LÀM MỎNG --- */}
+                        <div className="flex bg-slate-200/50 p-1 sm:p-1.5 rounded-xl sm:rounded-2xl mx-0 sm:mx-8 mb-2 sm:mb-6 backdrop-blur-md shadow-inner">
                             {['HK1', 'HK2', 'CN'].map(tab => (
                                 <button 
                                     key={tab} 
                                     onClick={()=>setTermTab(tab)} 
-                                    className={`flex-1 py-3 text-center rounded-xl transition-all duration-300 font-extrabold text-sm sm:text-base ${termTab === tab ? 'bg-white text-blue-600 shadow-md scale-100' : 'text-slate-500 hover:text-slate-700 hover:bg-white/40 scale-[0.98]'}`}
+                                    className={`flex-1 py-1.5 sm:py-3 text-center rounded-lg sm:rounded-xl transition-all duration-300 font-extrabold text-[11px] sm:text-base ${termTab === tab ? 'bg-white text-blue-600 shadow-md scale-100' : 'text-slate-500 hover:text-slate-700 hover:bg-white/40 scale-[0.98]'}`}
                                 >
                                     {tab === 'CN' ? 'CẢ NĂM' : `HỌC KỲ ${tab === 'HK1' ? 'I' : 'II'}`}
                                 </button>
@@ -696,67 +696,67 @@
                         </div>
                         
                         {!displayData ? (
-                            <div className="glass-panel p-10 text-center text-slate-500 font-bold sm:rounded-3xl border-y sm:border border-slate-200/50 shadow-sm">
+                            <div className="glass-panel p-6 sm:p-10 text-center text-slate-500 text-sm sm:text-base font-bold rounded-2xl sm:rounded-3xl border sm:border border-slate-200/50 shadow-sm">
                                 Chưa có dữ liệu điểm cho {termTab === 'HK1' ? 'Học kỳ I' : (termTab === 'HK2' ? 'Học kỳ II' : 'Cả Năm')}.
                             </div>
                         ) : (
-                            <div className="glass-panel sm:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-b sm:border border-t-0 border-slate-200/50 overflow-hidden">
+                            <div className="glass-panel rounded-2xl sm:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border sm:border border-slate-200/50 overflow-hidden mb-4 sm:mb-0">
                                 
-                                {/* TỔNG KẾT ĐÃ ĐƯỢC TỐI ƯU KHÔNG RỚT DÒNG */}
+                                {/* TỔNG KẾT - ÉP NÉN PADDING */}
                                 <div className="grid grid-cols-3 gap-0 border-b border-slate-200/50">
-                                    <div className="bg-slate-50/50 p-3 sm:p-6 border-r border-slate-200/50 text-center flex flex-col justify-center">
-                                        <p className="text-[10px] sm:text-xs text-slate-500 font-extrabold mb-1 uppercase tracking-wider">Rèn luyện</p>
+                                    <div className="bg-slate-50/50 p-2 sm:p-6 border-r border-slate-200/50 text-center flex flex-col justify-center">
+                                        <p className="text-[9px] sm:text-xs text-slate-500 font-extrabold mb-0.5 sm:mb-1 uppercase tracking-wider">Rèn luyện</p>
                                         <p className="text-sm sm:text-2xl font-black text-slate-800 whitespace-nowrap">{displayData.conduct || '-'}</p>
                                     </div>
-                                    <div className="bg-blue-50/40 p-3 sm:p-6 border-r border-slate-200/50 text-center flex flex-col justify-center">
-                                        <p className="text-[10px] sm:text-xs text-blue-600 font-extrabold mb-1 uppercase tracking-wider">Học tập</p>
+                                    <div className="bg-blue-50/40 p-2 sm:p-6 border-r border-slate-200/50 text-center flex flex-col justify-center">
+                                        <p className="text-[9px] sm:text-xs text-blue-600 font-extrabold mb-0.5 sm:mb-1 uppercase tracking-wider">Học tập</p>
                                         <p className="text-sm sm:text-2xl font-black text-blue-700 whitespace-nowrap">{displayData.summary.result}</p>
                                     </div>
-                                    <div className="bg-amber-50/40 p-3 sm:p-6 text-center flex flex-col justify-center overflow-hidden">
-                                        <p className="text-[10px] sm:text-xs text-amber-600 font-extrabold mb-1 uppercase tracking-wider">Danh hiệu</p>
-                                        <p className="text-[11px] sm:text-xl font-black text-amber-600 leading-tight drop-shadow-sm whitespace-nowrap tracking-tighter sm:tracking-normal">{displayData.summary.title}</p>
+                                    <div className="bg-amber-50/40 p-2 sm:p-6 text-center flex flex-col justify-center overflow-hidden">
+                                        <p className="text-[9px] sm:text-xs text-amber-600 font-extrabold mb-0.5 sm:mb-1 uppercase tracking-wider">Danh hiệu</p>
+                                        <p className="text-[10px] sm:text-xl font-black text-amber-600 leading-tight drop-shadow-sm whitespace-nowrap tracking-tighter sm:tracking-normal">{displayData.summary.title}</p>
                                     </div>
                                 </div>
 
-                                <div className="p-3 sm:p-5 border-b border-slate-200/50 bg-white/40 flex items-center gap-3">
-                                    <div className="p-2 bg-blue-100 rounded-lg text-blue-600"><Activity size={18}/></div>
-                                    <span className="font-extrabold text-slate-800">Bảng điểm chi tiết</span>
+                                <div className="p-2 sm:p-5 border-b border-slate-200/50 bg-white/40 flex items-center gap-2 sm:gap-3">
+                                    <div className="p-1.5 sm:p-2 bg-blue-100 rounded-md sm:rounded-lg text-blue-600"><Activity size={14} className="sm:w-[18px] sm:h-[18px]"/></div>
+                                    <span className="font-extrabold text-slate-800 text-xs sm:text-base">Bảng điểm chi tiết</span>
                                 </div>
 
                                 <div className="overflow-x-auto w-full">
                                     <table className="w-full text-left whitespace-nowrap">
                                         <thead className="bg-slate-50/80 border-b border-slate-200/80">
                                             <tr>
-                                                <th className="px-2 py-3 sm:p-5 text-[10px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider">Môn học</th>
+                                                <th className="px-2 py-2 sm:p-5 text-[10px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider">Môn học</th>
                                                 {termTab !== 'CN' && (
                                                     <>
-                                                        <th className="px-1 py-3 sm:p-5 text-[10px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider text-center">
+                                                        <th className="px-1 py-2 sm:p-5 text-[10px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider text-center">
                                                             <span className="sm:hidden">TX</span>
                                                             <span className="hidden sm:inline">Thường Xuyên</span>
                                                         </th>
-                                                        <th className="px-1 py-3 sm:p-5 text-[10px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider text-center">GK</th>
-                                                        <th className="px-1 py-3 sm:p-5 text-[10px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider text-center">CK</th>
+                                                        <th className="px-1 py-2 sm:p-5 text-[10px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider text-center">GK</th>
+                                                        <th className="px-1 py-2 sm:p-5 text-[10px] sm:text-sm font-extrabold text-slate-500 uppercase tracking-wider text-center">CK</th>
                                                     </>
                                                 )}
-                                                <th className="px-2 py-3 sm:p-5 text-[11px] sm:text-sm font-extrabold text-blue-600 uppercase tracking-wider text-center bg-blue-50/50">TBM</th>
+                                                <th className="px-2 py-2 sm:p-5 text-[11px] sm:text-sm font-extrabold text-blue-600 uppercase tracking-wider text-center bg-blue-50/50">TBM</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-100">
                                             {displayData.grades?.map((g, i) => (
                                                 <tr key={i} className={`transition-all duration-200 hover:bg-blue-50/60 ${i % 2 === 0 ? 'bg-white/40' : 'bg-slate-50/40'}`}>
-                                                    <td className="px-2 py-2 sm:p-5 font-bold text-xs sm:text-base text-slate-800">{g.subject}</td>
+                                                    <td className="px-2 py-1.5 sm:p-5 font-bold text-[11px] sm:text-base text-slate-800">{g.subject}</td>
                                                     {termTab !== 'CN' && (
                                                         <>
-                                                            <td className="px-1 py-2 sm:p-5 text-center">
+                                                            <td className="px-1 py-1.5 sm:p-5 text-center">
                                                                 <span className="text-[11px] sm:text-sm font-bold text-slate-600 tracking-tighter sm:tracking-normal">
                                                                     {g.tx?.join(', ')}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-1 py-2 sm:p-5 text-center text-xs sm:text-base font-bold text-slate-700">{g.gk}</td>
-                                                            <td className="px-1 py-2 sm:p-5 text-center text-xs sm:text-base font-bold text-slate-700">{g.ck}</td>
+                                                            <td className="px-1 py-1.5 sm:p-5 text-center text-[11px] sm:text-base font-bold text-slate-700">{g.gk}</td>
+                                                            <td className="px-1 py-1.5 sm:p-5 text-center text-[11px] sm:text-base font-bold text-slate-700">{g.ck}</td>
                                                         </>
                                                     )}
-                                                    <td className={`px-2 py-2 sm:p-5 text-center text-xs sm:text-base font-black bg-blue-50/30 ${g.tbm === 'Đ' ? 'text-emerald-600' : g.tbm === 'CĐ' ? 'text-red-500' : 'text-blue-600 sm:text-lg'}`}>
+                                                    <td className={`px-2 py-1.5 sm:p-5 text-center text-xs sm:text-base font-black bg-blue-50/30 ${g.tbm === 'Đ' ? 'text-emerald-600' : g.tbm === 'CĐ' ? 'text-red-500' : 'text-blue-600 sm:text-lg'}`}>
                                                         {g.tbm !== null ? g.tbm : '-'}
                                                     </td>
                                                 </tr>
@@ -764,7 +764,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <div className="p-4 text-[10px] sm:text-xs text-slate-400 text-center border-t border-slate-200/50 bg-slate-50/50 uppercase font-bold tracking-widest">
+                                <div className="p-2 sm:p-4 text-[9px] sm:text-xs text-slate-400 text-center border-t border-slate-200/50 bg-slate-50/50 uppercase font-bold tracking-widest">
                                     Đánh giá theo Thông tư 22/2021/TT-BGDĐT
                                 </div>
                             </div>
