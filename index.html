@@ -19,6 +19,8 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         * { -webkit-tap-highlight-color: transparent; }
         body { background-color: #f8fafc; }
+        .tab-active { border-bottom-width: 3px; border-color: #2563eb; color: #1e40af; font-weight: 700; }
+        .tab-inactive { color: #64748b; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -27,7 +29,7 @@
 
         const { useState, useEffect, useRef } = React;
 
-        // Các Icon được nhúng trực tiếp để đảm bảo KHÔNG BẢO GIỜ LỖI TRẮNG MÀN HÌNH
+        // Icons
         const GraduationCap = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21.42 10.922a2 2 0 0 0-.019-3.838L12.83 4.18a2 2 0 0 0-1.66 0L2.6 7.08a2 2 0 0 0 0 3.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>);
         const ShieldCheck = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>);
         const User = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>);
@@ -37,31 +39,30 @@
         const Trash2 = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>);
         const Activity = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>);
         const Download = ({ size = 24, className = "" }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>);
+        
+        // CỜ ĐÁNH DẤU MÔI TRƯỜNG DEV: Sẽ tự động biến thành false trong file xuất ra để ẩn nút
+        const IS_DEV_ENV = false;
 
         // ======================================================================
-        // BƯỚC 1: ĐIỀN MÃ CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY
+        // BƯỚC 1: ĐIỀN MÃ CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY ĐỂ APP HOẠT ĐỘNG
         // ======================================================================
         const firebaseConfig = {
-            apiKey: "ĐIỀN_API_KEY_CỦA_BẠN_VÀO_ĐÂY",
-            authDomain: "ĐIỀN_AUTH_DOMAIN_CỦA_BẠN_VÀO_ĐÂY",
-            projectId: "ĐIỀN_PROJECT_ID_CỦA_BẠN_VÀO_ĐÂY",
-            storageBucket: "ĐIỀN_STORAGE_BUCKET_CỦA_BẠN_VÀO_ĐÂY",
-            messagingSenderId: "ĐIỀN_MESSAGING_SENDER_ID_VÀO_ĐÂY",
-            appId: "ĐIỀN_APP_ID_VÀO_ĐÂY"
+            apiKey: "AIzaSyBzTbPNmG7NKjp7SoLKYDmonWZhYti9PhA",
+            authDomain: "thcs-nhon.firebaseapp.com",
+            projectId: "thcs-nhon",
+            storageBucket: "thcs-nhon.firebasestorage.app",
+            messagingSenderId: "324165034057",
+            appId: "1:324165034057:web:a784f923d3b78f96b59f98"
         };
 
-        // Khởi tạo Firebase
         let auth, db;
         try {
-            // Kiểm tra xem người dùng đã thay mã chưa
             if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "ĐIỀN_API_KEY_CỦA_BẠN_VÀO_ĐÂY") {
                 firebase.initializeApp(firebaseConfig);
                 auth = firebase.auth();
                 db = firebase.firestore();
             }
-        } catch(e) {
-            console.warn("Lỗi khởi tạo Firebase", e);
-        }
+        } catch(e) { console.warn("Lỗi khởi tạo Firebase", e); }
 
         const allClassesList = [];
         for (let grade = 6; grade <= 9; grade++) {
@@ -70,33 +71,45 @@
             }
         }
 
+        // Cấu hình chuẩn số cột TX theo Thông tư 22 (Vừa khít không thừa không thiếu)
         const subjectConfig = [
-            { name: "Toán học", prefix: "Toan", startCol: 6, color: "#D9E1F2" },
-            { name: "Ngữ văn", prefix: "Van", startCol: 13, color: "#FCE4D6" },
-            { name: "Ngoại ngữ", prefix: "NN", startCol: 20, color: "#FFF2CC" },
-            { name: "Khoa học tự nhiên", prefix: "KHTN", startCol: 27, color: "#E2EFDA" },
-            { name: "Lịch sử và Địa lí", prefix: "LSDL", startCol: 34, color: "#F8CBAD" },
-            { name: "GDCD", prefix: "GDCD", startCol: 41, color: "#B4C6E7" },
-            { name: "Tin học", prefix: "Tin", startCol: 48, color: "#FFE699" },
-            { name: "Công nghệ", prefix: "CN", startCol: 55, color: "#C6E0B4" }
+            { name: "Toán học", prefix: "Toan", type: "score", txCount: 4, color: "#D9E1F2" },
+            { name: "Ngữ văn", prefix: "Van", type: "score", txCount: 4, color: "#FCE4D6" },
+            { name: "Ngoại ngữ", prefix: "NN", type: "score", txCount: 4, color: "#FFF2CC" },
+            { name: "Khoa học tự nhiên", prefix: "KHTN", type: "score", txCount: 4, color: "#E2EFDA" },
+            { name: "Lịch sử và Địa lí", prefix: "LSDL", type: "score", txCount: 4, color: "#F8CBAD" },
+            { name: "GDCD", prefix: "GDCD", type: "score", txCount: 2, color: "#B4C6E7" },
+            { name: "Tin học", prefix: "Tin", type: "score", txCount: 2, color: "#FFE699" },
+            { name: "Công nghệ", prefix: "CN", type: "score", txCount: 2, color: "#C6E0B4" },
+            { name: "Giáo dục thể chất", prefix: "GDTC", type: "passfail", txCount: 3, color: "#EDEDED" },
+            { name: "Nghệ thuật", prefix: "NgheThuat", type: "passfail", txCount: 3, color: "#EDEDED" },
+            { name: "Hoạt động trải nghiệm", prefix: "HDTN", type: "passfail", txCount: 4, color: "#EDEDED" },
+            { name: "Giáo dục địa phương", prefix: "GDDP", type: "passfail", txCount: 2, color: "#EDEDED" }
         ];
 
         function App() {
             const [firebaseUser, setFirebaseUser] = useState(null);
             const [students, setStudents] = useState([]);
+            
             const [activeTab, setActiveTab] = useState('student');
             const [view, setView] = useState('login');
+            
+            // State Đăng nhập
             const [emailInput, setEmailInput] = useState('');
             const [studentPasswordInput, setStudentPasswordInput] = useState('');
-            const [pinInput, setPinInput] = useState('');
+            const [teacherClassInput, setTeacherClassInput] = useState('');
+            const [teacherPasswordInput, setTeacherPasswordInput] = useState('');
             const [loginError, setLoginError] = useState('');
+            
+            // State Giáo viên
             const [isUploading, setIsUploading] = useState(false);
             const fileInputRef = useRef(null);
+            
+            // State View Mode
             const [currentStudentData, setCurrentStudentData] = useState(null);
-            const [selectedClass, setSelectedClass] = useState('Tất cả');
-            const [templateClass, setTemplateClass] = useState('6A1'); 
+            const [termTab, setTermTab] = useState('HK2'); // Học sinh đang xem học kỳ nào
+            const [teacherClass, setTeacherClass] = useState(''); // Giáo viên đang quản lý lớp nào
 
-            // Kết nối dữ liệu Firebase hoặc dùng LocalStorage (Demo Mode)
             useEffect(() => {
                 if (auth) {
                     auth.signInAnonymously().catch(e => console.error(e));
@@ -106,26 +119,14 @@
             }, []);
 
             useEffect(() => {
-                if (db) {
-                    if (!firebaseUser) return;
-                    const colRef = db.collection('students_data_2025');
+                if (db && firebaseUser) {
+                    const colRef = db.collection('students_data_2025_2026');
                     const unsubscribe = colRef.onSnapshot((snapshot) => {
                         const dataList = [];
                         snapshot.forEach(doc => dataList.push({ id: doc.id, ...doc.data() }));
                         setStudents(dataList);
                     }, (error) => console.error(error));
                     return () => unsubscribe();
-                } else {
-                    // CHẾ ĐỘ DEMO (OFFLINE): Tự động load dữ liệu từ bộ nhớ trình duyệt
-                    try {
-                        const localData = localStorage.getItem('thcs_nhonphu_data');
-                        if (localData) {
-                            setStudents(JSON.parse(localData) || []);
-                        }
-                    } catch (e) {
-                        console.error(e);
-                        setStudents([]);
-                    }
                 }
             }, [firebaseUser]);
 
@@ -133,37 +134,57 @@
                 e.preventDefault();
                 setLoginError('');
 
+                if (!db) {
+                    setLoginError('HỆ THỐNG ĐÃ KHOÁ. Vui lòng kết nối Cơ sở dữ liệu Firebase ở Bước 1 trong mã nguồn.');
+                    return;
+                }
+
                 if (activeTab === 'student') {
                     const studentInfo = students.find(s => s.email.toLowerCase() === emailInput.toLowerCase());
                     if (studentInfo) {
                         if (studentInfo.password === studentPasswordInput) {
                             setCurrentStudentData(studentInfo);
+                            setTermTab('HK2');
                             setView('student_view');
                         } else {
                             setLoginError('Mật khẩu không chính xác!');
                         }
                     } else {
-                        setLoginError('Không tìm thấy học sinh. Hãy báo Giáo viên tải điểm lên trước!');
+                        setLoginError('Không tìm thấy dữ liệu học sinh này trên hệ thống!');
                     }
                 } else {
-                    if (pinInput === '123456') setView('admin_view');
-                    else setLoginError('Mã PIN không chính xác (Thử: 123456)');
+                    const formattedClass = teacherClassInput.trim().toUpperCase();
+                    if (!allClassesList.includes(formattedClass)) {
+                        setLoginError('Tên lớp không hợp lệ (Ví dụ hợp lệ: 6A1, 9A8)');
+                        return;
+                    }
+                    if (teacherPasswordInput === '456789') {
+                        setTeacherClass(formattedClass);
+                        setView('admin_view');
+                    } else {
+                        setLoginError('Mật khẩu Giáo viên không chính xác!');
+                    }
                 }
             };
 
             const handleLogout = () => {
                 setView('login');
                 setCurrentStudentData(null);
+                setTeacherClass('');
                 setEmailInput('');
                 setStudentPasswordInput('');
-                setPinInput('');
+                setTeacherPasswordInput('');
             };
 
+            // ----- XUẤT SOURCE CODE HTML ĐỂ UP HOST -----
             const downloadAppSource = () => {
                 const scriptElement = document.querySelector('script[type="text/babel"]');
-                const reactCode = scriptElement ? scriptElement.textContent : "";
+                let reactCode = scriptElement ? scriptElement.textContent : "";
                 
-                const htmlTemplate = `<!DOCTYPE html>\n<html lang="vi">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">\n    <title>Cổng Tra Cứu Điểm THCS Nhơn Phú</title>\n    <script src="https://cdn.tailwindcss.com"><\/script>\n    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin><\/script>\n    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin><\/script>\n    <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>\n    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"><\/script>\n    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"><\/script>\n    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"><\/script>\n    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"><\/script>\n    <style>\n        ::-webkit-scrollbar { width: 6px; height: 6px; }\n        ::-webkit-scrollbar-track { background: transparent; }\n        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }\n        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }\n        * { -webkit-tap-highlight-color: transparent; }\n        body { background-color: #f8fafc; }\n    </style>\n</head>\n<body>\n    <div id="root"></div>\n    <script type="text/babel">\n${reactCode}\n    <\/script>\n</body>\n</html>`;
+                // Tự động TẮT cờ IS_DEV_ENV thành false trong file xuất ra để ẩn nút
+                reactCode = reactCode.replace('const IS_DEV_ENV = true;', 'const IS_DEV_ENV = false;');
+                
+                const htmlTemplate = `<!DOCTYPE html>\n<html lang="vi">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">\n    <title>Cổng Tra Cứu Điểm THCS Nhơn Phú</title>\n    <script src="https://cdn.tailwindcss.com"><\/script>\n    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin><\/script>\n    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin><\/script>\n    <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>\n    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"><\/script>\n    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"><\/script>\n    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"><\/script>\n    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"><\/script>\n    <style>\n        ::-webkit-scrollbar { width: 6px; height: 6px; }\n        ::-webkit-scrollbar-track { background: transparent; }\n        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }\n        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }\n        * { -webkit-tap-highlight-color: transparent; }\n        body { background-color: #f8fafc; }\n        .tab-active { border-bottom-width: 3px; border-color: #2563eb; color: #1e40af; font-weight: 700; }\n        .tab-inactive { color: #64748b; font-weight: 600; }\n    </style>\n</head>\n<body>\n    <div id="root"></div>\n    <script type="text/babel">\n${reactCode}\n    <\/script>\n</body>\n</html>`;
 
                 const blob = new Blob([htmlTemplate], { type: 'text/html;charset=utf-8' });
                 const link = document.createElement("a");
@@ -174,6 +195,7 @@
                 document.body.removeChild(link);
             };
 
+            // ----- THUẬT TOÁN ĐIỂM SỐ TT22 -----
             const parseNumberOrEmpty = (val) => {
                 if (val === undefined || val === null) return undefined;
                 const s = String(val).trim();
@@ -183,24 +205,26 @@
             };
 
             const calculateTBM = (txs, gk, ck) => {
-                if (gk === undefined || ck === undefined) return null;
+                if (gk === undefined || ck === undefined || gk === '' || ck === '') return null;
                 const sumTX = txs.reduce((a, b) => a + b, 0);
                 const totalWeight = txs.length + 5; 
-                const tbm = (sumTX + gk*2 + ck*3) / totalWeight;
+                const tbm = (sumTX + Number(gk)*2 + Number(ck)*3) / totalWeight;
                 return Math.round(tbm * 10) / 10;
             };
 
             const evaluateStudent = (grades, conductInput) => {
-                const scoredGrades = grades.filter(g => typeof g.tbm === 'number' && !isNaN(g.tbm));
-                const commentGrades = grades.filter(g => typeof g.ck === 'string' && (g.ck.toUpperCase() === 'Đ' || g.ck.toUpperCase() === 'CĐ'));
-
                 const conduct = (conductInput || "Chưa xét").trim();
-                if (scoredGrades.length === 0) return { result: "Chưa xét", conduct: conduct, title: "Không" };
+                const validGrades = grades.filter(g => g.tbm !== null && g.tbm !== undefined && g.tbm !== "");
+                
+                if (validGrades.length === 0) return { result: "Chưa xét", conduct: conduct, title: "Không" };
+
+                const scoredGrades = validGrades.filter(g => typeof g.tbm === 'number');
+                const commentGrades = validGrades.filter(g => typeof g.tbm === 'string');
 
                 const tbms = scoredGrades.map(g => g.tbm);
-                const comments = commentGrades.map(g => g.ck.toUpperCase());
+                const comments = commentGrades.map(g => g.tbm.toUpperCase());
 
-                const isAllCommentsPass = comments.length > 0 && comments.every(c => c === 'Đ');
+                const isAllCommentsPass = (comments.length === 0) || comments.every(c => c === 'Đ');
                 const countCommentFail = comments.filter(c => c === 'CĐ').length;
 
                 const countTBMGTE8 = tbms.filter(t => t >= 8.0).length;
@@ -222,90 +246,73 @@
                 return { result, conduct, title };
             };
 
+            // ----- XUẤT FILE EXCEL THEO LỚP ĐƯỢC CHỈ ĐỊNH -----
             const downloadTemplate = async () => {
                 try {
                     setIsUploading(true);
                     const workbook = new window.ExcelJS.Workbook();
-                    const sheet = workbook.addWorksheet('BangDiem', { views: [{ state: 'frozen', xSplit: 6, ySplit: 1 }] });
+                    
+                    const createSheet = (sheetName) => {
+                        const sheet = workbook.addWorksheet(sheetName, { views: [{ state: 'frozen', xSplit: 5, ySplit: 1 }] });
+                        
+                        let columns = [
+                            { header: 'MaHS', key: 'mahs', width: 12 },
+                            { header: 'Email', key: 'email', width: 25 },
+                            { header: 'MatKhau', key: 'matkhau', width: 12 },
+                            { header: 'HoTen', key: 'hoten', width: 28 },
+                            { header: 'HanhKiem', key: 'hanhkiem', width: 12 }
+                        ];
 
-                    const columns = [
-                        { header: 'MaHS', key: 'mahs', width: 12 },
-                        { header: 'Email', key: 'email', width: 30 },
-                        { header: 'MatKhau', key: 'matkhau', width: 15 },
-                        { header: 'HoTen', key: 'hoten', width: 28 },
-                        { header: 'Lop', key: 'lop', width: 8 },
-                        { header: 'RenLuyen', key: 'renluyen', width: 12 }
-                    ];
-
-                    subjectConfig.forEach(s => {
-                        ['TX1', 'TX2', 'TX3', 'TX4', 'TX5', 'GK', 'CK'].forEach(t => {
-                            const headerName = `${s.prefix}_${t}`;
-                            columns.push({ header: headerName, width: headerName.length + 3 }); 
+                        subjectConfig.forEach(subj => {
+                            for(let i=1; i<=subj.txCount; i++) columns.push({ header: `${subj.prefix}_TX${i}`, width: 6 });
+                            columns.push({ header: `${subj.prefix}_GK`, width: 6 });
+                            columns.push({ header: `${subj.prefix}_CK`, width: 6 });
                         });
-                    });
 
-                    ['GDTC', 'NgheThuat', 'GDDP', 'HDTN'].forEach(h => {
-                        columns.push({ header: h, width: Math.max(12, h.length + 3) });
-                    });
+                        sheet.columns = columns;
+                        const headerRow = sheet.getRow(1);
+                        headerRow.font = { bold: true };
+                        headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+                        headerRow.height = 30;
 
-                    sheet.columns = columns;
+                        for(let i = 1; i <= 5; i++) headerRow.getCell(i).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD0CECE' } };
+                        
+                        let colIdx = 6;
+                        subjectConfig.forEach(subj => {
+                            const argbColor = subj.color.replace('#', 'FF'); 
+                            for(let i = 0; i < subj.txCount + 2; i++) {
+                                headerRow.getCell(colIdx).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: argbColor } };
+                                colIdx++;
+                            }
+                        });
 
-                    const headerRow = sheet.getRow(1);
-                    headerRow.font = { bold: true };
-                    headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
-                    headerRow.height = 25;
-
-                    for(let i = 1; i <= 6; i++) {
-                        headerRow.getCell(i).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD0CECE' } };
-                    }
-                    
-                    let colIdx = 7;
-                    subjectConfig.forEach(s => {
-                        const argbColor = s.color.replace('#', 'FF'); 
-                        for(let i = 0; i < 7; i++) {
-                            headerRow.getCell(colIdx).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: argbColor } };
-                            colIdx++;
-                        }
-                    });
-
-                    for(let i = 0; i < 4; i++) {
-                        headerRow.getCell(colIdx).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEDEDED' } };
-                        colIdx++;
-                    }
-
-                    const sample1 = [
-                        "HS001", "hs1@nhonphu.edu.vn", "123456", "Nguyễn Lê Phương Khánh", templateClass, "Tốt",
-                        8,8,9,null,null,8,8.5, 8,8,8,9,null,9,8.5, 8,8,6,8,null,10,9.3, 10,9,8,10,null,9.8,8, 10,10,null,null,null,8,9.3, 10,9,null,null,null,9.5,10, 8,9,null,null,null,8,8.5, 7,7,null,null,null,7.5,7, "Đ", "Đ", "Đ", "Đ"
-                    ];
-                    
-                    const sample2 = [
-                        "HS002", "hs2@nhonphu.edu.vn", "123456", "Phạm Thị Thảo", templateClass, "Khá",
-                        5,6,6,null,null,6.2,6.6, 7,8,8,null,null,8.5,7.8, 5,7,6,null,null,8.4,6, 9,9,5,null,null,8.3,8.5, 8,9,8,null,null,6.5,8.8, 8,10,null,null,null,9.8,8.5, 8,6,8,null,null,8.5,8.5, 5,6,null,null,null,5.5,5, "Đ", "Đ", "Đ", "Đ"
-                    ];
-
-                    [sample1, sample2].forEach(data => {
-                        const row = sheet.addRow(data);
-                        let dColIdx = 7;
-                        subjectConfig.forEach(s => {
-                            const argbColor = s.color.replace('#', 'FF');
-                            for(let i = 0; i < 7; i++) {
+                        // Tạo 1 dòng mẫu ứng với lớp của giáo viên này
+                        const sampleData = ["HS001", "hs1@nhonphu.edu.vn", "123456", "Học Sinh Mẫu", "Tốt"];
+                        // Đổ dữ liệu rỗng cho khớp số cột điểm
+                        subjectConfig.forEach(subj => {
+                            for(let i=0; i<subj.txCount + 2; i++) sampleData.push("");
+                        });
+                        
+                        const row = sheet.addRow(sampleData);
+                        let dColIdx = 6;
+                        subjectConfig.forEach(subj => {
+                            const argbColor = subj.color.replace('#', 'FF');
+                            for(let i = 0; i < subj.txCount + 2; i++) {
                                 row.getCell(dColIdx).alignment = { horizontal: 'center' };
                                 row.getCell(dColIdx).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: argbColor } };
                                 dColIdx++;
                             }
                         });
-                        for(let i = 0; i < 4; i++) {
-                            row.getCell(dColIdx).alignment = { horizontal: 'center' };
-                            row.getCell(dColIdx).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEDEDED' } };
-                            dColIdx++;
-                        }
-                    });
+                    };
+
+                    createSheet('HK I');
+                    createSheet('HK II');
 
                     const buffer = await workbook.xlsx.writeBuffer();
                     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                     const link = document.createElement("a");
                     link.href = URL.createObjectURL(blob);
-                    link.download = `Mau_Nhap_Diem_${templateClass}.xlsx`;
+                    link.download = `Nhap_Diem_Lop_${teacherClass}.xlsx`;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
@@ -317,6 +324,7 @@
                 }
             };
 
+            // ----- ĐỌC FILE EXCEL & TÍNH ĐIỂM CẢ NĂM -----
             const handleFileUpload = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -330,71 +338,123 @@
                             const workbook = new window.ExcelJS.Workbook();
                             await workbook.xlsx.load(buffer);
                             
-                            const worksheet = workbook.worksheets[0];
-                            const parsedRows = [];
-                            
-                            worksheet.eachRow((row, rowNumber) => {
-                                const rowData = [];
-                                row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-                                    let val = cell.value;
-                                    if (val && typeof val === 'object') {
-                                        if (val.richText) val = val.richText.map(rt => rt.text).join('');
-                                        else if (val.result !== undefined) val = val.result;
-                                    }
-                                    rowData[colNumber - 1] = val ?? "";
+                            const parseSheet = (sheetName) => {
+                                const worksheet = workbook.getWorksheet(sheetName);
+                                if (!worksheet) return [];
+                                const parsedRows = [];
+                                worksheet.eachRow((row) => {
+                                    const rowData = [];
+                                    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+                                        let val = cell.value;
+                                        if (val && typeof val === 'object') {
+                                            if (val.richText) val = val.richText.map(rt => rt.text).join('');
+                                            else if (val.result !== undefined) val = val.result;
+                                        }
+                                        rowData[colNumber - 1] = val ?? "";
+                                    });
+                                    parsedRows.push(rowData);
                                 });
-                                parsedRows.push(rowData);
-                            });
-                            
-                            const newStudents = [];
-                            for (let i = 1; i < parsedRows.length; i++) {
-                                const row = parsedRows[i];
-                                if (!row || row.length < 3 || String(row[0]).trim() === "") continue; 
                                 
-                                let studentGrades = [];
-                                subjectConfig.forEach(subj => {
-                                    const txScores = [];
-                                    for(let j = 0; j < 5; j++) {
-                                        const score = parseNumberOrEmpty(row[subj.startCol + j]);
-                                        if (score !== undefined) txScores.push(score);
-                                    }
-                                    const gk = parseNumberOrEmpty(row[subj.startCol + 5]);
-                                    const ck = parseNumberOrEmpty(row[subj.startCol + 6]);
-                                    let tbm = null;
-                                    if (gk !== undefined && ck !== undefined) tbm = calculateTBM(txScores, gk, ck);
+                                const termData = {};
+                                for (let i = 1; i < parsedRows.length; i++) {
+                                    const row = parsedRows[i];
+                                    if (!row || row.length < 3 || String(row[0]).trim() === "") continue; 
                                     
-                                    studentGrades.push({ subject: subj.name, tx: txScores, gk: gk?gk:"", ck: ck?ck:"", tbm: tbm });
+                                    const studentId = String(row[0]).trim();
+                                    const conduct = String(row[4] || "");
+                                    let grades = [];
+                                    
+                                    let colIdx = 5;
+                                    subjectConfig.forEach(subj => {
+                                        let tx = [];
+                                        for(let j=0; j<subj.txCount; j++) {
+                                            let v = row[colIdx++];
+                                            if(subj.type==='score') v = parseNumberOrEmpty(v);
+                                            else if(v) v = String(v).trim().toUpperCase();
+                                            if(v !== undefined && v !== "") tx.push(v);
+                                        }
+                                        let gk = row[colIdx++];
+                                        let ck = row[colIdx++];
+                                        if(subj.type==='score') { gk = parseNumberOrEmpty(gk); ck = parseNumberOrEmpty(ck); }
+                                        else { if(gk) gk = String(gk).trim().toUpperCase(); if(ck) ck = String(ck).trim().toUpperCase(); }
+                                        
+                                        let tbm = null;
+                                        if (subj.type === 'score') {
+                                            tbm = calculateTBM(tx, gk, ck);
+                                        } else {
+                                            tbm = ck ? ck : null; // Môn đánh giá lấy điểm CK làm TBM
+                                        }
+                                        
+                                        grades.push({ subject: subj.name, tx, gk: gk!=null?gk:"", ck: ck!=null?ck:"", tbm, type: subj.type });
+                                    });
+
+                                    const summary = evaluateStudent(grades, conduct);
+                                    termData[studentId] = {
+                                        email: String(row[1] || "").trim(),
+                                        password: String(row[2] || "").trim(),
+                                        name: String(row[3] || "").trim(),
+                                        conduct: conduct,
+                                        grades: grades,
+                                        summary: summary
+                                    };
+                                }
+                                return termData;
+                            };
+
+                            const hk1Data = parseSheet('HK I');
+                            const hk2Data = parseSheet('HK II');
+                            
+                            // Gộp HK1, HK2 và Tính Cả Năm
+                            const newStudents = [];
+                            const allStudentIds = new Set([...Object.keys(hk1Data), ...Object.keys(hk2Data)]);
+
+                            allStudentIds.forEach(id => {
+                                const d1 = hk1Data[id];
+                                const d2 = hk2Data[id];
+                                const baseInfo = d2 || d1; // Ưu tiên thông tin ở sheet HK2 nếu có
+                                
+                                // Bắt buộc học sinh up lên phải thuộc lớp của giáo viên đang quản lý
+                                if (!baseInfo) return;
+
+                                // Tính Cả Năm
+                                let cnGrades = [];
+                                subjectConfig.forEach(subj => {
+                                    let g1 = d1 ? d1.grades.find(g => g.subject === subj.name) : null;
+                                    let g2 = d2 ? d2.grades.find(g => g.subject === subj.name) : null;
+                                    
+                                    let tbm_cn = null;
+                                    if (subj.type === 'score') {
+                                        if (g1 && g1.tbm !== null && g2 && g2.tbm !== null) {
+                                            tbm_cn = Math.round(((g1.tbm + g2.tbm * 2) / 3) * 10) / 10;
+                                        }
+                                    } else {
+                                        // Môn Đánh giá: Nếu HK2 Đạt thì Cả năm Đạt
+                                        if (g2 && g2.ck === 'Đ') tbm_cn = 'Đ';
+                                        else if (g2 && g2.ck === 'CĐ') tbm_cn = 'CĐ';
+                                    }
+                                    cnGrades.push({ subject: subj.name, tx: [], gk: "", ck: "", tbm: tbm_cn, type: subj.type });
                                 });
 
-                                const passFailSubjects = ["Giáo dục thể chất", "Nghệ thuật", "Giáo dục địa phương", "Hoạt động trải nghiệm"];
-                                passFailSubjects.forEach((subjName, idx) => {
-                                    const val = row[62 + idx] ? String(row[62 + idx]).trim().toUpperCase() : "";
-                                    studentGrades.push({ subject: subjName, tx: [], gk: "", ck: val, tbm: val });
-                                });
-
-                                const summary = evaluateStudent(studentGrades, String(row[5] || ""));
+                                const cnConduct = d2 ? d2.conduct : (d1 ? d1.conduct : "");
+                                const cnSummary = evaluateStudent(cnGrades, cnConduct);
 
                                 newStudents.push({
-                                    id: String(row[0]).trim(), email: String(row[1]).trim(), password: String(row[2]).trim(), name: String(row[3]).trim(), class: String(row[4]).trim(),
-                                    schoolYear: "2025 - 2026", semester: "Học kỳ 2",
-                                    grades: studentGrades, summary: summary
+                                    id: id, email: baseInfo.email, password: baseInfo.password, name: baseInfo.name, class: teacherClass,
+                                    schoolYear: "2025 - 2026",
+                                    hk1: d1 ? { conduct: d1.conduct, grades: d1.grades, summary: d1.summary } : null,
+                                    hk2: d2 ? { conduct: d2.conduct, grades: d2.grades, summary: d2.summary } : null,
+                                    cn: { conduct: cnConduct, grades: cnGrades, summary: cnSummary }
                                 });
-                            }
+                            });
 
-                            if (newStudents.length === 0) { alert("Không tìm thấy dữ liệu hợp lệ!"); setIsUploading(false); return; }
+                            if (newStudents.length === 0) { alert("File không có dữ liệu hoặc tên Sheet không đúng (Yêu cầu sheet tên 'HK I' và 'HK II')."); setIsUploading(false); return; }
 
-                            if (db) {
-                                const colRef = db.collection('students_data_2025');
-                                for (const student of newStudents) {
-                                    await colRef.doc(student.id).set(student);
-                                }
-                            } else {
-                                // CHẾ ĐỘ DEMO: Lưu vào bộ nhớ đệm trình duyệt
-                                setStudents(newStudents);
-                                localStorage.setItem('thcs_nhonphu_data', JSON.stringify(newStudents));
+                            const colRef = db.collection('students_data_2025_2026');
+                            for (const student of newStudents) {
+                                await colRef.doc(`${teacherClass}_${student.id}`).set(student);
                             }
                             
-                            alert(`Hoàn tất cập nhật ${newStudents.length} học sinh.`);
+                            alert(`Hoàn tất cập nhật ${newStudents.length} học sinh cho lớp ${teacherClass}.`);
                         } catch (error) {
                             alert("Lỗi đọc file Excel."); console.error(error);
                         } finally {
@@ -408,23 +468,16 @@
                 }
             };
 
-            const handleDeleteStudent = async (id) => {
-                if (window.confirm('Bạn có chắc chắn muốn xóa?')) {
-                    if (db) {
-                        await db.collection('students_data_2025').doc(id).delete();
-                    } else {
-                        // CHẾ ĐỘ DEMO
-                        const updated = students.filter(s => s.id !== id);
-                        setStudents(updated);
-                        localStorage.setItem('thcs_nhonphu_data', JSON.stringify(updated));
-                    }
+            const handleDeleteStudent = async (docId) => {
+                if (window.confirm('Bạn có chắc chắn muốn xóa học sinh này khỏi hệ thống?')) {
+                    await db.collection('students_data_2025_2026').doc(docId).delete();
                 }
             };
 
-            const classes = ['Tất cả', ...new Set((students || []).map(s => s.class))].sort();
-            const filteredStudents = selectedClass === 'Tất cả' ? (students || []) : (students || []).filter(s => s.class === selectedClass);
+            // Giáo viên chỉ thấy học sinh lớp mình
+            const myClassStudents = students.filter(s => s.class === teacherClass);
 
-            // GIAO DIỆN ĐĂNG NHẬP
+            // ----- GIAO DIỆN ĐĂNG NHẬP -----
             if (view === 'login') {
                 return (
                     <div className="min-h-[100dvh] bg-slate-50 flex items-center justify-center p-4 font-sans text-slate-800">
@@ -432,8 +485,7 @@
                             <div className="text-center mb-8">
                                 <div className="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg"><GraduationCap size={32} className="text-white" /></div>
                                 <h1 className="text-2xl font-bold text-slate-900">THCS Nhơn Phú</h1>
-                                <p className="text-slate-500 mt-1">Cổng thông tin & tra cứu điểm</p>
-                                {!db && <p className="inline-block mt-2 px-3 py-1 bg-amber-100 text-amber-700 text-[11px] font-bold rounded-full">⚠️ Chế độ dùng thử Offline</p>}
+                                <p className="text-slate-500 mt-1">Hệ thống Quản lý & Tra cứu Điểm</p>
                             </div>
                             <div className="flex p-1 bg-slate-100 rounded-2xl mb-8">
                                 <button onClick={() => { setActiveTab('student'); setLoginError(''); }} className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all ${activeTab === 'student' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>Học Sinh</button>
@@ -444,70 +496,69 @@
                                     <>
                                         <div className="relative">
                                             <div className="absolute left-4 top-3.5 text-slate-400"><User size={18} /></div>
-                                            <input type="email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Email (vd: hs1@nhonphu.edu.vn)" required />
+                                            <input type="email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Email học sinh" required />
                                         </div>
                                         <div className="relative mt-4">
                                             <div className="absolute left-4 top-3.5 text-slate-400"><ShieldCheck size={18} /></div>
-                                            <input type="password" value={studentPasswordInput} onChange={(e) => setStudentPasswordInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Mật khẩu học sinh" required />
+                                            <input type="password" value={studentPasswordInput} onChange={(e) => setStudentPasswordInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Mật khẩu tra cứu" required />
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="relative">
-                                        <div className="absolute left-4 top-3.5 text-slate-400"><ShieldCheck size={18} /></div>
-                                        <input type="password" value={pinInput} onChange={(e) => setPinInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Mã PIN Giáo viên (Thử: 123456)" required />
-                                    </div>
+                                    <>
+                                        <div className="relative">
+                                            <div className="absolute left-4 top-3.5 text-slate-400"><User size={18} /></div>
+                                            <input type="text" value={teacherClassInput} onChange={(e) => setTeacherClassInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all uppercase" placeholder="Tên đăng nhập (Ví dụ: 6A1)" required />
+                                        </div>
+                                        <div className="relative mt-4">
+                                            <div className="absolute left-4 top-3.5 text-slate-400"><ShieldCheck size={18} /></div>
+                                            <input type="password" value={teacherPasswordInput} onChange={(e) => setTeacherPasswordInput(e.target.value)} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Mật khẩu Giáo viên" required />
+                                        </div>
+                                    </>
                                 )}
                                 {loginError && <p className="text-sm text-red-500 font-medium ml-1 bg-red-50 p-2 rounded-lg">{loginError}</p>}
                                 <button type="submit" className="w-full py-3.5 text-white bg-blue-600 hover:bg-blue-700 rounded-2xl font-semibold transition-all shadow-md active:scale-95">
-                                    {activeTab === 'student' ? 'Tra Cứu Điểm' : 'Quản Lý Dữ Liệu'}
+                                    {activeTab === 'student' ? 'Tra Cứu Điểm' : 'Quản Lý Lớp'}
                                 </button>
                             </form>
-
+                            
                             <div className="mt-8 text-center border-t border-slate-100 pt-6">
-                                <button type="button" onClick={downloadAppSource} className="text-sm text-slate-500 hover:text-blue-600 font-medium transition-colors flex items-center justify-center w-full gap-2 p-2 rounded-xl hover:bg-slate-50">
-                                    <Download size={16} /> Tải Mã Nguồn (index.html) để Up Host
-                                </button>
-                                <div className="mt-4 text-xs text-slate-400">Năm học 2025 - 2026</div>
+                                {/* HIỂN THỊ NÚT XUẤT SOURCE CODE NẾU ĐANG Ở TRÊN CANVAS */}
+                                {IS_DEV_ENV ? (
+                                    <button type="button" onClick={downloadAppSource} className="text-sm text-slate-500 hover:text-blue-600 font-medium transition-colors flex items-center justify-center w-full gap-2 p-2 rounded-xl hover:bg-slate-50 mb-4">
+                                        <Download size={16} /> Tải Mã Nguồn (index.html) để Up Host
+                                    </button>
+                                ) : null}
+                                <div className="text-xs text-slate-400 font-medium">Bản quyền thuộc trường THCS Nhơn Phú - Năm 2025</div>
                             </div>
                         </div>
                     </div>
                 );
             }
 
-            // GIAO DIỆN GIÁO VIÊN
+            // ----- GIAO DIỆN GIÁO VIÊN -----
             if (view === 'admin_view') {
                 return (
                     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-0 sm:pb-12">
                         <header className="bg-slate-900 text-white h-16 flex items-center px-4 sm:px-6 justify-between sticky top-0 z-50 shadow-md">
                             <div className="font-bold flex items-center gap-2">
                                 <ShieldCheck className="text-blue-400" size={24} />
-                                <span className="hidden sm:inline">Portal Giáo Viên</span><span className="sm:hidden">Admin</span>
-                                {!db && <span className="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-2">Demo Mode</span>}
+                                <span className="hidden sm:inline">Portal Giáo Viên - Lớp {teacherClass}</span><span className="sm:hidden">Lớp {teacherClass}</span>
                             </div>
                             <button onClick={handleLogout} className="text-sm bg-white/10 px-3 py-2 rounded-xl flex items-center gap-2 hover:bg-white/20 transition-colors"><LogOut size={16} /> Thoát</button>
                         </header>
                         <main className="max-w-6xl mx-auto px-0 sm:px-4 mt-0 sm:mt-8">
                             <div className="p-4 sm:p-0 flex flex-col md:flex-row justify-between items-start md:items-center mb-0 sm:mb-6 gap-4 bg-white sm:bg-transparent border-b sm:border-none">
                                 <div>
-                                    <h2 className="text-xl sm:text-2xl font-bold">Danh sách học sinh</h2>
-                                    <p className="text-slate-500 text-xs sm:text-sm mt-1">Quản lý điểm 32 lớp (Năm 2025-2026)</p>
+                                    <h2 className="text-xl sm:text-2xl font-bold">Danh sách học sinh lớp {teacherClass}</h2>
+                                    <p className="text-slate-500 text-xs sm:text-sm mt-1">Dữ liệu được quản lý bảo mật theo từng lớp.</p>
                                 </div>
                                 <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-                                    <div className="flex items-center bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-medium shadow-sm overflow-hidden w-full sm:w-auto focus-within:ring-2 ring-blue-500">
-                                        <select value={templateClass} onChange={(e) => setTemplateClass(e.target.value)} className="flex-1 sm:w-auto px-3 py-2.5 outline-none bg-slate-50 border-r border-slate-200 text-slate-700 font-semibold appearance-none">
-                                            {allClassesList.map(c => <option key={c} value={c}>Mẫu {c}</option>)}
-                                        </select>
-                                        <button onClick={downloadTemplate} disabled={isUploading} className="px-4 py-2.5 hover:bg-emerald-50 flex items-center justify-center gap-2 transition-colors text-emerald-600 font-bold bg-white min-w-[130px]">
-                                            <FileSpreadsheet size={16} /> {isUploading ? 'Đang tạo...' : 'Tải Excel'}
-                                        </button>
-                                    </div>
+                                    <button onClick={downloadTemplate} disabled={isUploading} className="w-full sm:w-auto px-4 py-2.5 hover:bg-slate-200 border flex items-center justify-center gap-2 transition-colors text-slate-700 rounded-xl font-bold bg-white shadow-sm min-w-[130px]">
+                                        <FileSpreadsheet size={16} /> {isUploading ? 'Đang xử lý...' : 'Tải File Mẫu (Đủ môn)'}
+                                    </button>
                                     <input type="file" accept=".xlsx" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
-                                    <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-sm transition-colors active:scale-95"><Upload size={16} /> Tải Lên Hệ Thống</button>
+                                    <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm transition-colors active:scale-95"><Upload size={16} /> Cập Nhật Điểm Lên Hệ Thống</button>
                                 </div>
-                            </div>
-
-                            <div className="bg-white p-3 sm:p-2 sm:rounded-2xl shadow-sm border-b sm:border border-slate-100 sm:mb-6 flex gap-2 overflow-x-auto">
-                                {classes.map(c => <button key={c} onClick={() => setSelectedClass(c)} className={`px-4 py-2 sm:py-1.5 rounded-xl whitespace-nowrap text-sm font-bold transition-all ${selectedClass === c ? 'bg-blue-100 text-blue-700' : 'text-slate-500 bg-slate-50 hover:bg-slate-100 border border-slate-200/60'}`}>{c}</button>)}
                             </div>
 
                             <div className="bg-white sm:rounded-3xl shadow-sm border-b sm:border border-slate-200 overflow-hidden">
@@ -515,35 +566,37 @@
                                     <table className="w-full text-left whitespace-nowrap">
                                         <thead className="bg-slate-50">
                                             <tr>
-                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">HS / Lớp</th>
-                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Họ Tên</th>
-                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider text-center">Học tập</th>
+                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Mã HS / Mật khẩu</th>
+                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Họ Tên / Email</th>
+                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider text-center">HK I</th>
+                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider text-center">HK II</th>
+                                                <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider text-center">Cả Năm</th>
                                                 <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Danh hiệu</th>
                                                 <th className="p-3 sm:p-4"></th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-100">
-                                            {filteredStudents.map(s => (
+                                            {myClassStudents.map(s => (
                                                 <tr key={s.id} className="hover:bg-slate-50 transition-colors">
                                                     <td className="p-3 sm:p-4">
-                                                        <div className="flex flex-col gap-1">
-                                                            <span className="font-bold text-slate-800 text-sm">{s.id}</span>
-                                                            <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md text-[10px] font-bold w-fit">{s.class}</span>
-                                                        </div>
+                                                        <div className="font-bold text-slate-800 text-sm">{s.id}</div>
+                                                        <div className="text-[10px] sm:text-xs text-slate-400 font-mono">Pass: {s.password}</div>
                                                     </td>
-                                                    <td className="p-3 sm:p-4 font-semibold text-slate-800 text-sm">
-                                                        {s.name}
-                                                        <div className="text-[10px] sm:text-xs text-slate-400 font-normal">{s.email}</div>
+                                                    <td className="p-3 sm:p-4">
+                                                        <div className="font-semibold text-slate-800 text-sm">{s.name}</div>
+                                                        <div className="text-[10px] sm:text-xs text-slate-400">{s.email}</div>
                                                     </td>
-                                                    <td className="p-3 sm:p-4 font-bold text-blue-600 text-center text-sm">{s.summary?.result}</td>
-                                                    <td className="p-3 sm:p-4 text-sm text-amber-600 font-bold">{s.summary?.title}</td>
+                                                    <td className="p-3 sm:p-4 text-center text-sm font-medium text-slate-600">{s.hk1?.summary?.result || '-'}</td>
+                                                    <td className="p-3 sm:p-4 text-center text-sm font-medium text-slate-600">{s.hk2?.summary?.result || '-'}</td>
+                                                    <td className="p-3 sm:p-4 font-bold text-blue-600 text-center text-sm bg-blue-50/20">{s.cn.summary.result}</td>
+                                                    <td className="p-3 sm:p-4 text-sm text-amber-600 font-bold">{s.cn.summary.title}</td>
                                                     <td className="p-3 sm:p-4 text-right">
-                                                        <button onClick={() => handleDeleteStudent(s.id)} className="text-slate-400 p-2 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                                                        <button onClick={() => handleDeleteStudent(`${teacherClass}_${s.id}`)} className="text-slate-400 p-2 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18}/></button>
                                                     </td>
                                                 </tr>
                                             ))}
-                                            {filteredStudents.length === 0 && (
-                                                <tr><td colSpan="5" className="p-8 text-center text-slate-500">Chưa có dữ liệu học sinh nào. Hãy Tải File Excel Mẫu về và Tải Lên Hệ Thống.</td></tr>
+                                            {myClassStudents.length === 0 && (
+                                                <tr><td colSpan="7" className="p-8 text-center text-slate-500">Lớp {teacherClass} chưa có dữ liệu. Vui lòng Tải File Mẫu và điền điểm để cập nhật.</td></tr>
                                             )}
                                         </tbody>
                                     </table>
@@ -554,8 +607,11 @@
                 );
             }
 
-            // GIAO DIỆN HỌC SINH
+            // ----- GIAO DIỆN HỌC SINH -----
             const user = currentStudentData;
+            // Xác định dữ liệu đang hiển thị dựa vào tab đang chọn
+            const displayData = termTab === 'HK1' ? user.hk1 : (termTab === 'HK2' ? user.hk2 : user.cn);
+
             return (
                 <div className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-0 sm:pb-12">
                     <header className="bg-white shadow-sm h-16 flex items-center px-4 sm:px-6 justify-between sticky top-0 z-50">
@@ -570,66 +626,89 @@
                                     <h2 className="text-xl sm:text-3xl font-bold mb-1 leading-tight text-slate-900">{user.name}</h2>
                                     <p className="text-slate-500 text-xs sm:text-sm font-semibold flex items-center gap-1.5 flex-wrap">
                                         <span className="bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1"><User size={12}/> Lớp: {user.class}</span> 
-                                        <span className="bg-slate-100 px-2 py-0.5 rounded">HK2 (2025-2026)</span>
+                                        <span className="bg-slate-100 px-2 py-0.5 rounded">Năm: 2025-2026</span>
                                     </p>
                                 </div>
                             </div>
-                            
-                            <div className="grid grid-cols-3 gap-2 w-full md:w-auto">
-                                <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-center">
-                                    <p className="text-[10px] text-slate-500 font-bold mb-0.5 uppercase">Rèn luyện</p>
-                                    <p className="text-base sm:text-xl font-bold text-slate-800">{user.summary.conduct}</p>
-                                </div>
-                                <div className="bg-blue-50 p-3 rounded-2xl border border-blue-100 text-center">
-                                    <p className="text-[10px] text-blue-600 font-bold mb-0.5 uppercase">Học tập</p>
-                                    <p className="text-base sm:text-xl font-bold text-blue-700">{user.summary.result}</p>
-                                </div>
-                                <div className="bg-amber-50 p-3 rounded-2xl border border-amber-100 text-center flex flex-col justify-center">
-                                    <p className="text-[10px] text-amber-600 font-bold mb-0.5 uppercase">Danh hiệu</p>
-                                    <p className="text-sm font-bold text-amber-700 leading-tight">{user.summary.title}</p>
-                                </div>
-                            </div>
+                        </div>
+
+                        {/* --- TAB CHỌN KỲ HỌC --- */}
+                        <div className="flex bg-white px-4 sm:px-6 border-b border-slate-200 shadow-sm sm:rounded-t-3xl">
+                            <button onClick={()=>setTermTab('HK1')} className={`flex-1 py-4 text-center cursor-pointer transition-colors ${termTab==='HK1'?'tab-active':'tab-inactive hover:bg-slate-50'}`}>HỌC KỲ I</button>
+                            <button onClick={()=>setTermTab('HK2')} className={`flex-1 py-4 text-center cursor-pointer transition-colors ${termTab==='HK2'?'tab-active':'tab-inactive hover:bg-slate-50'}`}>HỌC KỲ II</button>
+                            <button onClick={()=>setTermTab('CN')} className={`flex-1 py-4 text-center cursor-pointer transition-colors ${termTab==='CN'?'tab-active':'tab-inactive hover:bg-slate-50'}`}>CẢ NĂM</button>
                         </div>
                         
-                        <div className="bg-white sm:rounded-3xl shadow-sm sm:border border-slate-200 overflow-hidden">
-                            <div className="p-4 border-b bg-slate-50/80 flex items-center gap-2">
-                                <Activity className="text-blue-600" size={18}/>
-                                <span className="font-bold text-slate-800">Bảng điểm chi tiết</span>
+                        {!displayData ? (
+                            <div className="bg-white p-8 text-center text-slate-500 font-medium sm:rounded-b-3xl border-b sm:border border-slate-200">
+                                Chưa có dữ liệu điểm cho {termTab === 'HK1' ? 'Học kỳ I' : (termTab === 'HK2' ? 'Học kỳ II' : 'Cả Năm')}.
                             </div>
-                            <div className="overflow-x-auto w-full">
-                                <table className="w-full text-left whitespace-nowrap">
-                                    <thead className="bg-white border-b border-slate-100">
-                                        <tr>
-                                            <th className="p-3 sm:p-4 text-[11px] sm:text-sm font-bold text-slate-500 uppercase">Môn học</th>
-                                            <th className="p-3 sm:p-4 text-[11px] sm:text-sm font-bold text-slate-500 uppercase">Đ.Thường xuyên</th>
-                                            <th className="p-3 sm:p-4 text-[11px] sm:text-sm font-bold text-slate-500 uppercase text-center">G.Kỳ</th>
-                                            <th className="p-3 sm:p-4 text-[11px] sm:text-sm font-bold text-slate-500 uppercase text-center">C.Kỳ</th>
-                                            <th className="p-3 sm:p-4 text-[11px] sm:text-sm font-bold text-blue-600 uppercase text-center bg-blue-50/50">TBM</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {user.grades?.map((g, i) => (
-                                            <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                                                <td className="p-3 sm:p-4 font-bold text-xs sm:text-sm text-slate-800">{g.subject}</td>
-                                                <td className="p-3 sm:p-4">
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {g.tx?.map((sc, idx) => <span key={idx} className="px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded text-xs sm:text-sm font-bold border border-slate-200/50">{sc}</span>)}
-                                                    </div>
-                                                </td>
-                                                <td className="p-3 sm:p-4 text-center text-xs sm:text-sm font-bold text-slate-700">{g.gk}</td>
-                                                <td className="p-3 sm:p-4 text-center text-xs sm:text-sm font-bold text-slate-700">{g.ck}</td>
-                                                <td className={`p-3 sm:p-4 text-center text-xs sm:text-sm font-black bg-blue-50/30 ${g.tbm === 'Đ' ? 'text-emerald-600' : g.tbm === 'CĐ' ? 'text-red-500' : 'text-blue-700'}`}>
-                                                    {g.tbm !== null ? g.tbm : '-'}
-                                                </td>
+                        ) : (
+                            <div className="bg-white sm:rounded-b-3xl shadow-sm border-b sm:border border-t-0 border-slate-200 overflow-hidden">
+                                
+                                {/* Tổng kết */}
+                                <div className="grid grid-cols-3 gap-0 border-b border-slate-100">
+                                    <div className="bg-slate-50 p-4 border-r border-slate-100 text-center">
+                                        <p className="text-[10px] text-slate-500 font-bold mb-0.5 uppercase">Rèn luyện</p>
+                                        <p className="text-base sm:text-xl font-bold text-slate-800">{displayData.conduct || '-'}</p>
+                                    </div>
+                                    <div className="bg-blue-50/50 p-4 border-r border-slate-100 text-center">
+                                        <p className="text-[10px] text-blue-600 font-bold mb-0.5 uppercase">Học tập</p>
+                                        <p className="text-base sm:text-xl font-bold text-blue-700">{displayData.summary.result}</p>
+                                    </div>
+                                    <div className="bg-amber-50/50 p-4 text-center flex flex-col justify-center">
+                                        <p className="text-[10px] text-amber-600 font-bold mb-0.5 uppercase">Danh hiệu</p>
+                                        <p className="text-sm font-bold text-amber-700 leading-tight">{displayData.summary.title}</p>
+                                    </div>
+                                </div>
+
+                                <div className="p-3 border-b bg-slate-50/80 flex items-center gap-2">
+                                    <Activity className="text-blue-600" size={18}/>
+                                    <span className="font-bold text-slate-800 text-sm">Bảng điểm chi tiết ({termTab})</span>
+                                </div>
+                                <div className="overflow-x-auto w-full">
+                                    <table className="w-full text-left whitespace-nowrap">
+                                        <thead className="bg-white border-b border-slate-100">
+                                            <tr>
+                                                <th className="p-3 sm:p-4 text-[11px] sm:text-sm font-bold text-slate-500 uppercase">Môn học</th>
+                                                {termTab !== 'CN' && (
+                                                    <>
+                                                        <th className="p-3 sm:p-4 text-[11px] sm:text-sm font-bold text-slate-500 uppercase">Đ.Thường xuyên</th>
+                                                        <th className="p-3 sm:p-4 text-[11px] sm:text-sm font-bold text-slate-500 uppercase text-center">G.Kỳ</th>
+                                                        <th className="p-3 sm:p-4 text-[11px] sm:text-sm font-bold text-slate-500 uppercase text-center">C.Kỳ</th>
+                                                    </>
+                                                )}
+                                                <th className="p-3 sm:p-4 text-[11px] sm:text-sm font-bold text-blue-600 uppercase text-center bg-blue-50/50">TBM</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {displayData.grades?.map((g, i) => (
+                                                <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                                                    <td className="p-3 sm:p-4 font-bold text-xs sm:text-sm text-slate-800">{g.subject}</td>
+                                                    {termTab !== 'CN' && (
+                                                        <>
+                                                            <td className="p-3 sm:p-4">
+                                                                <div className="flex flex-wrap gap-1">
+                                                                    {g.tx?.map((sc, idx) => <span key={idx} className="px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded text-xs sm:text-sm font-bold border border-slate-200/50">{sc}</span>)}
+                                                                </div>
+                                                            </td>
+                                                            <td className="p-3 sm:p-4 text-center text-xs sm:text-sm font-bold text-slate-700">{g.gk}</td>
+                                                            <td className="p-3 sm:p-4 text-center text-xs sm:text-sm font-bold text-slate-700">{g.ck}</td>
+                                                        </>
+                                                    )}
+                                                    <td className={`p-3 sm:p-4 text-center text-xs sm:text-sm font-black bg-blue-50/30 ${g.tbm === 'Đ' ? 'text-emerald-600' : g.tbm === 'CĐ' ? 'text-red-500' : 'text-blue-700'}`}>
+                                                        {g.tbm !== null ? g.tbm : '-'}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="p-3 text-[10px] sm:text-xs text-slate-400 text-center border-t border-slate-100 bg-slate-50 uppercase font-semibold tracking-wide">
+                                    Đánh giá theo Thông tư 22/2021/TT-BGDĐT
+                                </div>
                             </div>
-                            <div className="p-3 text-[10px] sm:text-xs text-slate-400 text-center border-t border-slate-100 bg-slate-50 uppercase font-semibold tracking-wide">
-                                Đánh giá theo Thông tư 22/2021/TT-BGDĐT
-                            </div>
-                        </div>
+                        )}
                     </main>
                 </div>
             );
