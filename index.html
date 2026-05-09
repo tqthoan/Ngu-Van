@@ -264,9 +264,14 @@
                         ];
 
                         subjectConfig.forEach(subj => {
-                            for(let i=1; i<=subj.txCount; i++) columns.push({ header: `${subj.prefix}_TX${i}`, width: 6 });
-                            columns.push({ header: `${subj.prefix}_GK`, width: 6 });
-                            columns.push({ header: `${subj.prefix}_CK`, width: 6 });
+                            for(let i=1; i<=subj.txCount; i++) {
+                                const h = `${subj.prefix}_TX${i}`;
+                                columns.push({ header: h, width: h.length + 3 });
+                            }
+                            const hGK = `${subj.prefix}_GK`;
+                            columns.push({ header: hGK, width: hGK.length + 3 });
+                            const hCK = `${subj.prefix}_CK`;
+                            columns.push({ header: hCK, width: hCK.length + 3 });
                         });
 
                         sheet.columns = columns;
@@ -286,22 +291,45 @@
                             }
                         });
 
-                        // Tạo 1 dòng mẫu ứng với lớp của giáo viên này
-                        const sampleData = ["HS001", "hs1@nhonphu.edu.vn", "123456", "Học Sinh Mẫu", "Tốt"];
-                        // Đổ dữ liệu rỗng cho khớp số cột điểm
+                        // Tạo dữ liệu Mẫu Học Sinh 1 (Loại Tốt)
+                        const sampleStudent1 = ["HS001", "hs1@nhonphu.edu.vn", "123456", "Nguyễn Lê Phương Khánh", "Tốt"];
+                        // Tạo dữ liệu Mẫu Học Sinh 2 (Loại Khá)
+                        const sampleStudent2 = ["HS002", "hs2@nhonphu.edu.vn", "123456", "Phạm Thị Thảo", "Khá"];
+
+                        // Đổ dữ liệu điểm cho tất cả các môn
                         subjectConfig.forEach(subj => {
-                            for(let i=0; i<subj.txCount + 2; i++) sampleData.push("");
+                            if (subj.type === 'score') {
+                                // Điểm mẫu Học sinh 1 (Điểm cao)
+                                const tx1 = [9, 9.5, 10, 9, 10];
+                                for(let i=0; i<subj.txCount; i++) sampleStudent1.push(tx1[i]);
+                                sampleStudent1.push(9.5); // Điểm GK
+                                sampleStudent1.push(9.0); // Điểm CK
+
+                                // Điểm mẫu Học sinh 2 (Điểm trung bình khá)
+                                const tx2 = [6.5, 7, 6, 7.5, 7];
+                                for(let i=0; i<subj.txCount; i++) sampleStudent2.push(tx2[i]);
+                                sampleStudent2.push(6.5); // Điểm GK
+                                sampleStudent2.push(7.0); // Điểm CK
+                            } else {
+                                // Môn Đánh giá (Pass/Fail) -> Điền "Đ" (Đạt)
+                                for(let i=0; i<subj.txCount + 2; i++) {
+                                    sampleStudent1.push("Đ");
+                                    sampleStudent2.push("Đ");
+                                }
+                            }
                         });
                         
-                        const row = sheet.addRow(sampleData);
-                        let dColIdx = 6;
-                        subjectConfig.forEach(subj => {
-                            const argbColor = subj.color.replace('#', 'FF');
-                            for(let i = 0; i < subj.txCount + 2; i++) {
-                                row.getCell(dColIdx).alignment = { horizontal: 'center' };
-                                row.getCell(dColIdx).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: argbColor } };
-                                dColIdx++;
-                            }
+                        [sampleStudent1, sampleStudent2].forEach(data => {
+                            const row = sheet.addRow(data);
+                            let dColIdx = 6;
+                            subjectConfig.forEach(subj => {
+                                const argbColor = subj.color.replace('#', 'FF');
+                                for(let i = 0; i < subj.txCount + 2; i++) {
+                                    row.getCell(dColIdx).alignment = { horizontal: 'center' };
+                                    row.getCell(dColIdx).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: argbColor } };
+                                    dColIdx++;
+                                }
+                            });
                         });
                     };
 
