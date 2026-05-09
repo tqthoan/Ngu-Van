@@ -627,9 +627,9 @@
                                         </thead>
                                         <tbody className="divide-y divide-slate-100">
                                             {myClassStudents.map((s, i) => (
-                                                <tr key={s.maDinhDanh} className={`transition-colors hover:bg-blue-50/60 ${i % 2 === 0 ? 'bg-white/40' : 'bg-slate-50/30'}`}>
+                                                <tr key={s.id} className={`transition-colors hover:bg-blue-50/60 ${i % 2 === 0 ? 'bg-white/40' : 'bg-slate-50/30'}`}>
                                                     <td className="p-4">
-                                                        <div className="font-bold text-slate-800 text-sm font-mono">{s.maDinhDanh}</div>
+                                                        <div className="font-bold text-slate-800 text-sm font-mono">{s.maDinhDanh || 'DỮ LIỆU CŨ'}</div>
                                                         <div className="text-[11px] text-slate-500 font-mono mt-0.5">Pass: <span className="font-semibold text-slate-700">{s.password}</span></div>
                                                     </td>
                                                     <td className="p-4 font-bold text-slate-800 text-sm">{s.name}</td>
